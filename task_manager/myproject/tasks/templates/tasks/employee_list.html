@@ -8,7 +8,7 @@
                 <table class="table table-striped">
                     <thead>
                         <tr>
-                            <th>Имя пользователя</th>
+                            <th>Фамилия Имя</th>
                             <th>Количество задач</th>
                             <th>Просроченные задачи</th>
                         </tr>
@@ -16,7 +16,13 @@
                     <tbody>
                         {% for employee in employees %}
                             <tr>
-                                <td>{{ employee.username }}</td>
+                                <td class="user-name">
+                                    {% if employee.last_name or employee.first_name %}
+                                        {{ employee.last_name }} {{ employee.first_name }}
+                                    {% else %}
+                                        {{ employee.username }}
+                                    {% endif %}
+                                </td>
                                 <td>
                                     {% if employee.task_count > 0 %}
                                         <a href="{% url 'task_list' %}?deadline=&status=&assigned_to={{ employee.id }}">{{ employee.task_count }}</a>
