@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+	<h1>Архив задач</h1>
+	<a href="{% url 'task_list' %}" class="btn btn-secondary mb-3">Вернуться к задачам</a>
+	<table class="table table-striped">
+		<thead>
+			<tr>
+				<th>Заголовок</th>
+				<th>Дедлайн</th>
+				<th>Статус</th>
+				<th>Назначено</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for task in tasks %}
+				<tr>
+					<td><a href="{% url 'task_detail' pk=task.pk %}">{{ task.title }}</a></td>
+					<td>{{ task.deadline|date:"d E Y" }}</td>
+					<td>{{ task.get_status_display }}</td>
+					<td>{{ task.assigned_to.username }}</td>
+				</tr>
+			{% empty %}
+				<tr>
+					<td colspan="4">Архив пуст</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+	
+	<script>
+		document.addEventListener('DOMContentLoaded', () => {
+			const notificationsDropdown = document.getElementById('notificationsDropdown');
+			const notificationsMenu = document.getElementById('notificationsMenu');
+			if (notificationsDropdown && notificationsMenu) {
+				notificationsDropdown.addEventListener('click', (e) => {
+					e.preventDefault();
+					notificationsMenu.classList.toggle('show');
+					if (notificationsMenu.classList.contains('show') && {{ unread_notifications_count }} > 0) {
+						$.ajax({
+							url: '{% url 'mark_notifications_read' %}',
+							method: 'POST',
+							headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+							success: function(data) {
+								if (data.status === 'success') {
+									document.querySelectorAll('.badge.bg-danger').forEach(badge => {
+										badge.remove();
+									});
+								}
+							},
+							error: function() {
+								console.error('Ошибка при отметке уведомлений');
+							}
+						});
+					}
+				});
+
+				document.addEventListener('click', (e) => {
+					if (!notificationsDropdown.contains(e.target) && !notificationsMenu.contains(e.target)) {
+						notificationsMenu.classList.remove('show');
+					}
+				});
+			}
+		});
+	</script>
+
+{% endblock %}

@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+	<div class="row justify-content-center">
+		<div class="col-md-8">
+			<h2>Создать задачу</h2>
+			{% if form.errors %}
+				<div class="alert alert-danger">
+					<ul>
+						{% for field in form %}
+							{% for error in field.errors %}
+								<li>{{ field.label }}: {{ error }}</li>
+							{% endfor %}
+						{% endfor %}
+						{% for error in form.non_field_errors %}
+							<li>{{ error }}</li>
+						{% endfor %}
+					</ul>
+				</div>
+			{% endif %}
+			<form method="post" class="mt-4" id="task-form">
+				{% csrf_token %}
+				<div class="mb-3">
+					<label for="{{ form.title.id_for_label }}" class="form-label">{{ form.title.label }}</label>
+					<input type="text" name="{{ form.title.name }}" id="{{ form.title.id_for_label }}" class="form-control" value="{{ form.title.value|default_if_none:'' }}" required>
+					{% if form.title.errors %}
+						<div class="invalid-feedback d-block">
+							{{ form.title.errors }}
+						</div>
+					{% endif %}
+				</div>
+				<div class="mb-3">
+					<label for="{{ form.description.id_for_label }}" class="form-label">{{ form.description.label }}</label>
+					<textarea name="{{ form.description.name }}" id="{{ form.description.id_for_label }}" class="form-control" rows="4">{{ form.description.value|default_if_none:'' }}</textarea>
+					{% if form.description.errors %}
+						<div class="invalid-feedback d-block">
+							{{ form.description.errors }}
+						</div>
+					{% endif %}
+				</div>
+				<div class="mb-3">
+					<label for="{{ form.deadline.id_for_label }}" class="form-label">{{ form.deadline.label }}</label>
+					<input type="datetime-local" name="{{ form.deadline.name }}" id="{{ form.deadline.id_for_label }}" class="form-control" value="{% if form.deadline.value %}{{ form.deadline.value|date:'Y-m-d\TH:i' }}{% endif %}" required>
+					{% if form.deadline.errors %}
+						<div class="invalid-feedback d-block">
+							{{ form.deadline.errors }}
+						</div>
+					{% endif %}
+				</div>
+				<div class="mb-3">
+					<label class="form-label">Назначенные сотрудники</label>
+					<div id="employee-fields">
+						<div class="employee-field mb-2 d-flex align-items-center">
+							<select name="employee_select_0" class="form-select employee-select me-2" required>
+								<option value="" disabled selected>Выберите сотрудника</option>
+								{% for employee in form.available_employees %}
+									<option value="{{ employee.id }}">{{ employee.username }}</option>
+								{% endfor %}
+							</select>
+							<button type="button" class="btn btn-danger btn-sm remove-employee invisible">Удалить</button>
+						</div>
+					</div>
+					<button type="button" class="btn btn-secondary btn-sm" id="add-employee">Добавить сотрудника</button>
+					{% if form.assigned_to_ids.errors %}
+						<div class="invalid-feedback d-block">
+							{{ form.assigned_to_ids.errors }}
+						</div>
+					{% endif %}
+				</div>
+				{{ form.assigned_to_ids }}
+				<button type="submit" class="btn btn-primary">Создать</button>
+				<a href="{% url 'task_list' %}" class="btn btn-secondary">Отмена</a>
+			</form>
+		</div>
+	</div>
+	
+	<script src="{% static 'js/task_form.js' %}"></script>
+
+	<script>
+		document.addEventListener('DOMContentLoaded', () => {
+			const notificationsDropdown = document.getElementById('notificationsDropdown');
+			const notificationsMenu = document.getElementById('notificationsMenu');
+			if (notificationsDropdown && notificationsMenu) {
+				notificationsDropdown.addEventListener('click', (e) => {
+					e.preventDefault();
+					notificationsMenu.classList.toggle('show');
+					if (notificationsMenu.classList.contains('show') && {{ unread_notifications_count }} > 0) {
+						$.ajax({
+							url: '{% url 'mark_notifications_read' %}',
+							method: 'POST',
+							headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+							success: function(data) {
+								if (data.status === 'success') {
+									document.querySelectorAll('.badge.bg-danger').forEach(badge => {
+										badge.remove();
+									});
+								}
+							},
+							error: function() {
+								console.error('Ошибка при отметке уведомлений');
+							}
+						});
+					}
+				});
+
+				document.addEventListener('click', (e) => {
+					if (!notificationsDropdown.contains(e.target) && !notificationsMenu.contains(e.target)) {
+						notificationsMenu.classList.remove('show');
+					}
+				});
+			}
+		});
+	</script>
+	
+{% endblock %}

@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+	<h1>Все уведомления</h1>
+	<a href="{% url 'task_list' %}" class="btn btn-secondary mb-3">Назад к списку задач</a>
+	{% if page_obj %}
+		<div class="mb-3">
+			<button id="clear-notifications" class="btn btn-danger">Очистить все уведомления</button>
+		</div>
+		<table class="table table-striped">
+			<thead>
+				<tr>
+					<th>Сообщение</th>
+					<th>Задача</th>
+					<th>Время</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for notification in page_obj %}
+					<tr>
+						<td {% if not notification.is_read %}class="fw-bold"{% endif %}>{{ notification.message }}</td>
+						<td>
+							{% if notification.task %}
+								<a href="{% url 'task_detail' pk=notification.task.pk %}">{{ notification.task.title }}</a>
+							{% else %}
+								-
+							{% endif %}
+						</td>
+						<td>{{ notification.created_at|date:"d E Y, H:i" }}</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+		
+		<nav aria-label="Page navigation">
+			<ul class="pagination">
+				{% if page_obj.has_previous %}
+					<li class="page-item">
+						<a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+							<span aria-hidden="true">&laquo;</span>
+						</a>
+					</li>
+				{% else %}
+					<li class="page-item disabled">
+						<span class="page-link">&laquo;</span>
+					</li>
+				{% endif %}
+				
+				{% for num in page_obj.paginator.page_range %}
+					{% if page_obj.number == num %}
+						<li class="page-item active">
+							<span class="page-link">{{ num }}</span>
+						</li>
+					{% elif num > page_obj.number|add:-3 and num < page_obj.number|add:3 %}
+						<li class="page-item">
+							<a class="page-link" href="?page={{ num }}">{{ num }}</a>
+						</li>
+					{% endif %}
+				{% endfor %}
+				
+				{% if page_obj.has_next %}
+					<li class="page-item">
+						<a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+							<span aria-hidden="true">&raquo;</span>
+						</a>
+					</li>
+				{% else %}
+					<li class="page-item disabled">
+						<span class="page-link">&raquo;</span>
+					</li>
+				{% endif %}
+			</ul>
+		</nav>
+	{% else %}
+		<p>Уведомлений нет</p>
+	{% endif %}
+
+	<script>
+		document.addEventListener('DOMContentLoaded', () => {
+			const notificationsDropdown = document.getElementById('notificationsDropdown');
+			const notificationsMenu = document.getElementById('notificationsMenu');
+			if (notificationsDropdown && notificationsMenu) {
+				notificationsDropdown.addEventListener('click', (e) => {
+					e.preventDefault();
+					notificationsMenu.classList.toggle('show');
+					if (notificationsMenu.classList.contains('show') && {{ unread_notifications_count }} > 0) {
+						$.ajax({
+							url: '{% url 'mark_notifications_read' %}',
+							method: 'POST',
+							headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+							success: function(data) {
+								if (data.status === 'success') {
+									document.querySelectorAll('.badge.bg-danger').forEach(badge => {
+										badge.remove();
+									});
+								}
+							},
+							error: function() {
+								console.error('Ошибка при отметке уведомлений');
+							}
+						});
+					}
+				});
+
+				document.addEventListener('click', (e) => {
+					if (!notificationsDropdown.contains(e.target) && !notificationsMenu.contains(e.target)) {
+						notificationsMenu.classList.remove('show');
+					}
+				});
+			}
+
+			const clearButton = document.getElementById('clear-notifications');
+			if (clearButton) {
+				clearButton.addEventListener('click', () => {
+					if (confirm('Вы уверены, что хотите удалить все уведомления?')) {
+						$.ajax({
+							url: '{% url 'clear_notifications' %}',
+							method: 'POST',
+							headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+							success: function(data) {
+								if (data.status === 'success') {
+									document.querySelector('table').remove();
+									document.querySelector('nav').remove();
+									document.querySelector('#clear-notifications').remove();
+									const noNotifications = document.createElement('p');
+									noNotifications.textContent = 'Уведомлений нет';
+									document.querySelector('.mb-3').insertAdjacentElement('afterend', noNotifications);
+								}
+							},
+							error: function() {
+								console.error('Ошибка при очистке уведомлений');
+							}
+						});
+					}
+				});
+			}
+		});
+	</script>
+{% endblock %}

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Управление задачами</title>
+	{% load static %}
+	<link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+	<style>
+		.notification-dropdown {
+			position: absolute;
+			top: 100%;
+			right: 0;
+			z-index: 1000;
+			display: none;
+			min-width: 300px;
+			background-color: white;
+			border: 1px solid #dee2ed;
+			border-radius: 0.25rem;
+			box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+		}
+		.notification-dropdown.show {
+			display: block;
+		}
+		.notification-item {
+			padding: 0.5rem 1rem;
+			border-bottom: 1px solid #dee2ed;
+		}
+		.notification-item:last-child {
+			border-bottom: none;
+		}
+	</style>
+
+</head>
+<body>
+	<nav class="navbar navbar-expand-lg navbar-light bg-light">	
+		<a class="navbar-brand" href="#">Управление задачами</a>
+		<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<div class="collapse navbar-collapse" id="navbarNav">
+			<ul class="navbar-nav ms-auto">
+				{% if user.groups.all.0.name == 'Менеджеры' %}
+					<li class="nav-item">
+						<a class="nav-link" href="{% url 'employee_list' %}">Список сотрудников</a>
+					</li>
+				{% endif %}
+				<li class="nav-item">
+					<a class="nav-link" href="{% url 'task_list' %}">Задачи</a>
+				</li>
+				<li class="nav-item dropdown position-relative">
+					<a class="nav-link" href="#" id="notificationsDropdown" role="button">
+						<i class="bi bi-bell"></i>
+						{% if unread_notifications_count > 0 %}
+							<span class="badge bg-danger"> {{ unread_notifications_count }}</span>
+						{% endif %}
+					</a>
+					<div class="notification-dropdown" id="notificationsMenu">
+						{% if notifications %}
+							{% for notification in notifications|slice:":5" %}
+								<div class="notification-item">
+									{% if notification.task %}
+										<a href="{% url 'task_detail' pk=notification.task.pk %}">{{ notification.message }}</a>
+									{% else %}
+										{{ notification.message }}
+									{% endif %}
+									<br>
+									<small>{{ notification.created_at|date:"d E Y, H:i" }}</small>
+								</div>
+							{% endfor %}
+							<div class="notification-item text-center">
+								<a href="{% url 'notifications_list' %}" class="btn btn-link">Показать все уведомления</a>
+							</div>
+						{% else %}
+							<div class="notification-item text-center">
+								Новых уведомлений нет
+							</div>
+						{% endif %}
+					</div>
+				</li>
+				{% if user.is_authenticated %}
+					<li class="nav-item">
+						<form action="{% url 'logout' %}" method="post" class="d-inline">
+							{% csrf_token %}
+							<button type="submit" class="nav-link btn btn-link">Выйти</button>
+						</form>
+					</li>
+				{% else %}
+					<li class="nav-item">
+						<a class="nav-link" href="{% url 'login' %}">Войти</a>
+					</li>
+				{% endif %}
+			</ul>
+		</div>
+	</nav>
+	<div class="container mt-4">
+		{% block content %}
+		{% endblock %}
+	</div>	
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

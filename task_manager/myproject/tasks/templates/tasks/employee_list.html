@@ -1,0 +1,44 @@
+{% extends 'base.html ' %}
+{% load static %}
+{% block content %}
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h2>Список сотрудников</h2>
+            {% if employees %}
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Имя пользователя</th>
+                            <th>Количество задач</th>
+                            <th>Просроченные задачи</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for employee in employees %}
+                            <tr>
+                                <td>{{ employee.username }}</td>
+                                <td>
+                                    {% if employee.task_count > 0 %}
+                                        <a href="{% url 'task_list' %}?deadline=&status=&assigned_to={{ employee.id }}">{{ employee.task_count }}</a>
+                                    {% else %}
+                                        {{ employee.task_count }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if employee.overdue_count > 0 %}
+                                        <a href="{% url 'task_list' %}?deadline=overdue&status=&assigned_to={{ employee.id }}">{{ employee.overdue_count }}</a>
+                                    {% else %}
+                                        {{ employee.overdue_count }}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>Сотрудники отсутствуют</p>
+            {% endif %}
+            <a href="{% url 'task_list' %}" class="btn btn-secondary mt-3">Вернуться к задачам</a>
+        </div>
+    </div>
+{% endblock %}

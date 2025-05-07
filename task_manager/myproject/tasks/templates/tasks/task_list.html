@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+	<h1>Список задач</h1>
+	{% if user.groups.all.0.name == 'Менеджеры' %}
+		<a href="{% url 'task_create' %}" class="btn btn-primary mb-3">Создать задачу</a>
+		<a href="{% url 'task_archive' %}" class="btn btn-primary mb-3">Архив</a>
+	{% endif %}
+	
+	<form method="get" class="mb-4" id="filter-form">
+		<div class="row g-3">
+			<div class="col-md-4">
+				<label for="{{ form.deadline.id_for_label }}" class="form-label">{{ form.deadline.label }}</label>
+				<select name="{{ form.deadline.name }}" id="{{ form.deadline.id_for_label }}" class="form-select">
+					{% for value, label in form.deadline.field.choices %}
+						<option value="{{ value }}" {% if form.deadline.value == value %}selected{% endif %}>{{ label }}</option>
+					{% endfor %}
+				</select>
+				{% if form.deadline.errors %}
+					<div class="invalid-feedback d-block">{{ form.deadline.errors }}</div>
+				{% endif %}
+			</div>
+			{% if user.groups.all.0.name == 'Менеджеры' %}
+				<div class="col-md-4">
+					<label for="{{ form.status.id_for_label }}" class="form-label">{{ form.status.label }}</label>
+					<select name="{{ form.status.name }}" id="{{ form.status.id_for_label }}" class="form-select">
+						{% for value, label in form.status.field.choices %}
+							<option value="{{ value }}" {% if form.status.value == value %}selected{% endif %}>{{ label }}</option>
+						{% endfor %}
+					</select>
+					{% if form.status.errors %}
+						<div class="invalid-feedback d-block">{{ form.status.errors }}</div>
+					{% endif %}
+				</div>
+				<div class="col-md-4">
+					<label for="{{ form.assigned_to.id_for_label }}" class="form-label">{{ form.assigned_to.label }}</label>
+					<select name="{{ form.assigned_to.name }}" id="{{ form.assigned_to.id_for_label }}" class="form-select">
+						<option value="" {% if not request.GET.assigned_to %}selected{% endif %}>Все</option>
+						{% for user in form.assigned_to.field.queryset %}
+							<option value="{{ user.id }}" {% if request.GET.assigned_to == user.id|stringformat:"s" %}selected{% endif %}>
+								{{ user.username }}
+							</option>
+						{% endfor %}
+					</select>
+					{% if form.assigned_to.errors %}
+						<div class="invalid-feedback d-block">{{ form.assigned_to.errors }}</div>
+					{% endif %}
+				</div>
+			{% endif %}
+		</div>
+		<div class="mt-3">
+			<a href="{% url 'task_list' %}" class="btn btn-secondary mt-3">Сбросить</a>
+		</div>
+	</form>
+	
+	<table class="table table-striped">
+		<thead>
+			<tr>
+				<th>Заголовок</th>
+				<th>
+					<a href="?sort=deadline&direction={% if sort == 'deadline' and direction == 'asc' %}desc{% else %}asc{% endif %}{% if form.deadline.value %}&deadline={{ form.deadline.value }}{% endif %}{% if form.status.value %}&status={{ form.status.value }}{% endif %}{% if form.assigned_to.value %}&assigned_to={{ form.assigned_to.value }}{% endif %}">
+						Дедлайн
+						{% if sort == 'deadline' %}
+							{% if direction == 'asc' %}↓{% else %}↑{% endif %}
+						{% endif %}
+					</a>
+				</th>
+				<th>Статус</th>
+				<th>Назначено</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for task in tasks %}
+				<tr {% if task.is_overdue %}class="table-danger"{% endif %}>
+					<td><a href="{% url 'task_detail' pk=task.pk %}" class="task-detail-link">{{ task.title }}</a></td>
+					<td>{{ task.deadline|date:"d E Y" }}</td>
+					<td>{{ task.get_status_display }}</td>
+					<td>
+						{% for user in task.assigned_to.all %}
+							{{ user.username }}{% if not forloop.last %}, {% endif %}
+						{% empty %}
+							Нет назначенных
+						{% endfor %}
+					</td>
+				</tr>
+			{% empty %}
+				<tr>
+					<td colspan="4">Нет задач</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+	
+	<script>
+		document.addEventListener('DOMContentLoaded', () => {
+			const selects = document.querySelectorAll('#filter-form .form-select');
+			selects.forEach(select => {
+				select.addEventListener('change', () => {
+					document.getElementById('filter-form').submit();
+				});
+			});
+
+			const taskLinks = document.querySelectorAll('.task-detail-link');
+			taskLinks.forEach(link => {
+				link.addEventListener('click', (e) => {
+					e.stopPropagation ();
+					window.location.href = link.href;
+				});
+			});
+		
+			const notificationsDropdown = document.getElementById('notificationsDropdown');
+			const notificationsMenu = document.getElementById('notificationsMenu');
+			if (notificationsDropdown && notificationsMenu) {
+				notificationsDropdown.addEventListener('click', (e) => {
+					e.preventDefault();
+					notificationsMenu.classList.toggle('show');
+					if (notificationsMenu.classList.contains('show') && {{ unread_notifications_count }} > 0) {
+						$.ajax({
+							url: '{% url 'mark_notifications_read' %}',
+							method: 'POST',
+							headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+							success: function(data) {
+								if (data.status === 'success') {
+									document.querySelectorAll('.badge.bg-danger').forEach(badge => {
+										badge.remove();
+									});
+								}
+							},
+							error: function() {
+								console.error('Ошибка при отметке уведомлений');
+							}
+						});
+					}
+				});
+
+				document.addEventListener('click', (e) => {
+					if (!notificationsDropdown.contains(e.target) && !notificationsMenu.contains(e.target)) {
+						notificationsMenu.classList.remove('show');
+					}
+				});
+			}
+		});
+	</script>
+
+{% endblock %}
