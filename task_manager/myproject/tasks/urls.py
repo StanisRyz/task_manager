@@ -10,6 +10,7 @@ urlpatterns = [
     #Детали задачи
     path('task/<int:pk>/', views.task_detail, name = 'task_detail'),
     path('task/<int:pk>/edit/', views.task_edit, name = 'task_edit'),
+    path('task/<int:pk>/delete/', views.task_delete, name = 'task_delete'),
     #Архив задач
     path('archive/', views.task_archived, name = 'task_archive'),
     #Проверка чтения уведомления

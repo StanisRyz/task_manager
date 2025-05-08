@@ -368,3 +368,14 @@ def employee_edit(request, user_id):
     context = {'form': form, 'user': user}
     context.update(get_notification_context(request))
     return render(request, 'tasks/employee_edit.html', context)
+
+@login_required
+@user_passes_test(is_manager, login_url = 'task_list')
+def task_delete(request, pk):
+    task = get_object_or_404(Task, pk = pk)
+    if task.status == 'archived':
+        return render(request, 'tasks/error.html', {'error_message': 'Нельзя удалить архивную задачу'}, status = 403)
+    if request.method == 'POST':
+        task.delete()
+        return redirect('task_list')
+    return redirect('task_detail', pk = pk)
