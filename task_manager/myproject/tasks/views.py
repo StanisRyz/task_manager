@@ -312,7 +312,7 @@ def is_manager(user):
 @user_passes_test(is_manager, login_url = 'task_list')
 def employee_list(request):
     employees = User.objects.filter(groups__name = 'Сотрудники').order_by('username').annotate(
-        task_count = Count('assigned_tasks'),
+        task_count = Count('assigned_tasks', filter = Q(assigned_tasks__status__in=['in_progress', 'on_revision', 'completed'])),
         overdue_count = Count('assigned_tasks', filter = Q(
             assigned_tasks__deadline__lt = timezone.now(),
             assigned_tasks__status__in = ['in_progress', 'on_revision']
