@@ -1,6 +1,7 @@
 from django import forms
 from .models import Task
 from django.contrib.auth.models import User
+import re
 
 #Форма для создания задач
 class TaskForm(forms.ModelForm):
@@ -60,3 +61,16 @@ class TaskForm(forms.ModelForm):
             print('Assigned users:', [user.id for user in assigned_users])
             task.assigned_to.set(assigned_users)
         return task
+
+class EmployeeCreationForm(forms.Form):
+    first_name = forms.CharField(max_length = 30, label = 'Имя')
+    last_name = forms.CharField(max_length = 150, label = 'Фамилия')
+    username = forms.CharField(max_length = 150, label = 'Username (на английском)')
+
+    def clean_username(self):
+        username = self.cleaned_data['username']
+        if not re.match(r'^[a-zA-Z0-9_]+$', username):
+            raise forms.ValidationError('Username должен содержать только латинские буквы, цифры или подчеркивания')
+        if User.objects.filter(username = username).exists():
+            raise forms.ValidationError('Это username уже занят')
+        return username

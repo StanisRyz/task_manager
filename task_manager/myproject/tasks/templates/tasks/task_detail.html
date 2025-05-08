@@ -9,12 +9,12 @@
 			<p><strong>Статус:</strong> {{ task.get_status_display }}</p>
 			<p><strong>Назначено:</strong>
 				{% for user in task.assigned_to.all %}
-					{{ user.username }}{% if not forloop.last %}, {% endif %}
+					{{ user.last_name }} {{ user.first_name }} {% if not forloop.last %}, {% endif %}
 				{% empty %}
 					Нет назначенных сотрудников
 				{% endfor %}
 			</p>
-			<p><strong>Создано:</strong> {{ task.created_by.username}} ({{ task.created_at|date:"d E Y" }})</p>
+			<p><strong>Создано:</strong> {{ task.created_by.last_name}} {{ task.created_by.first_name }} ({{ task.created_at|date:"d E Y" }})</p>
 			
 			<div class="mb-4 d-flex align-items-center">
 				{% if user.groups.all.0.name == 'Менеджеры' %}
@@ -50,7 +50,7 @@
 				<div class="card mb-2">
 					<div class="card-body">
 						<p>{{ comment.text }}</p>
-						<small>Автор: {{ comment.created_by.username }} | {{ comment.created_at|date:"d E Y, H:i" }} </small>
+						<small>Автор: {{ comment.created_by.last_name }} {{ comment.created_by.first_name }} | {{ comment.created_at|date:"d E Y, H:i" }} </small>
 					</div>
 				</div>
 			{% empty %}

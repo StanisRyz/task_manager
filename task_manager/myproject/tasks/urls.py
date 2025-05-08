@@ -17,4 +17,5 @@ urlpatterns = [
     path('notifications', views.notifications_list, name = 'notifications_list'),
     path('notifications/clear/', views.clear_notifications, name = 'clear_notifications'),
     path('employees/', views.employee_list, name = 'employee_list'),
+    path('employees/create', views.employee_create, name = 'employee_create'),
 ]

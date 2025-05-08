@@ -56,7 +56,7 @@
                                     <option value="" disabled selected>Выберите сотрудника</option>
                                     {% for avail_employee in form.available_employees %}
                                         <option value="{{ avail_employee.id }}" {% if avail_employee.id == employee.id %} selected {% endif %}>
-                                            {{ avail_employee.username }}
+                                            {{ avail_employee.last_name }} {{ avail_employee.first_name }}
                                         </option>
                                     {% endfor %}
                                 </select>
@@ -71,7 +71,7 @@
                                 <select name="employee_select_0" class="form-select employee-select me-2" required>
                                     <option value="" disabled selected>Выберите сотрудника</option>
                                     {% for employee in form.available_employees %}
-                                        <option value="{{ employee.id }}">{{ employee.username }}</option>
+                                        <option value="{{ employee.id }}">{{ employee.last_name }} {{ employee.first_name }}</option>
                                     {% endfor %}
                                 </select>
                                 <button type="button" class="btn btn-danger btn-sm remove-employee invisible">Удалить</button>

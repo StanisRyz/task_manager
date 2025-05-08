@@ -4,6 +4,7 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <h2>Список сотрудников</h2>
+            <a href="{% url 'employee_create' %}" class="btn btn-primary mb-3">Новый сотрудник</a>
             {% if employees %}
                 <table class="table table-striped">
                     <thead>

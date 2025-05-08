@@ -1,10 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from .models import Task, Comment, Notification
-from .forms import TaskForm
+from .forms import TaskForm, EmployeeCreationForm
 from django import forms
 from django.utils import timezone
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.http import JsonResponse
 from django.core.paginator import Paginator
 from django.db.models import Count, Q
@@ -323,3 +323,28 @@ def employee_list(request):
     }
     context.update(get_notification_context(request))
     return render(request, 'tasks/employee_list.html', context)
+
+@login_required
+@user_passes_test(is_manager, login_url = 'task_list')
+def employee_create(request):
+    if request.method == 'POST':
+        form = EmployeeCreationForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            first_name = form.cleaned_data['first_name']
+            last_name = form.cleaned_data['last_name']
+            password = f"1234{username[0].upper()}"
+            user = User.objects.create_user(
+                username = username,
+                first_name = first_name,
+                last_name = last_name,
+                password = password
+            )
+            employee_group = Group.objects.get(name = 'Сотрудники')
+            user.groups.add(employee_group)
+            return redirect('employee_list')
+    else:
+        form = EmployeeCreationForm()
+    context = {'form': form}
+    context.update(get_notification_context(request))
+    return render(request, 'tasks/employee_form.html', context)
