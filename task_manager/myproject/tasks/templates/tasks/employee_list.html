@@ -18,11 +18,13 @@
                         {% for employee in employees %}
                             <tr>
                                 <td class="user-name">
-                                    {% if employee.last_name or employee.first_name %}
-                                        {{ employee.last_name }} {{ employee.first_name }}
-                                    {% else %}
-                                        {{ employee.username }}
-                                    {% endif %}
+                                    <a href="{% url 'employee_edit' employee.id %}">
+                                        {% if employee.last_name or employee.first_name %}
+                                            {{ employee.last_name }} {{ employee.first_name }}
+                                        {% else %}
+                                            {{ employee.username }}
+                                        {% endif %}
+                                    </a>
                                 </td>
                                 <td>
                                     {% if employee.task_count > 0 %}

@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from .models import Task, Comment, Notification
-from .forms import TaskForm, EmployeeCreationForm
+from .forms import TaskForm, EmployeeCreationForm, EmployeeEditForm
 from django import forms
 from django.utils import timezone
 from django.contrib.auth.models import User, Group
@@ -348,3 +348,23 @@ def employee_create(request):
     context = {'form': form}
     context.update(get_notification_context(request))
     return render(request, 'tasks/employee_form.html', context)
+
+@login_required
+@user_passes_test(is_manager, login_url = 'task_list')
+def employee_edit(request, user_id):
+    user = get_object_or_404(User, id = user_id, groups__name = 'Сотрудники')
+    if request.method == 'POST':
+        form = EmployeeEditForm(request.POST, user = user)
+        if form.is_valid():
+            user.username = form.cleaned_data['username']
+            user.first_name = form.cleaned_data['first_name']
+            user.last_name = form.cleaned_data['last_name']
+            if form.cleaned_data['password']:
+                user.set_password(form.cleaned_data['password'])
+            user.save()
+            return redirect('employee_list')
+    else:
+        form = EmployeeEditForm(user = user)
+    context = {'form': form, 'user': user}
+    context.update(get_notification_context(request))
+    return render(request, 'tasks/employee_edit.html', context)

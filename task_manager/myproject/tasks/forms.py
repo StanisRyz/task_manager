@@ -74,3 +74,30 @@ class EmployeeCreationForm(forms.Form):
         if User.objects.filter(username = username).exists():
             raise forms.ValidationError('Это username уже занят')
         return username
+
+class EmployeeEditForm(forms.Form):
+    first_name = forms.CharField(max_length=30, label='Имя', required = True)
+    last_name = forms.CharField(max_length=150, label='Фамилия', required = True)
+    username = forms.CharField(max_length=150, label='Username (на английском)', required = True)
+    password = forms.CharField(
+        widget = forms.PasswordInput,
+        label = 'Новый пароль',
+        required = False,
+        help_text = 'Оставьте пустым, чтобы не менять пароль'
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        if self.user:
+            self.fields['first_name'].initial = self.user.first_name
+            self.fields['last_name'].initial = self.user.last_name
+            self.fields['username'].initial = self.user.username
+
+    def clean_username(self):
+        username = self.cleaned_data['username']
+        if not re.match(r'^[a-zA-Z0-9_]+$', username):
+            raise forms.ValidationError('Username должен содержать только латинские буквы, цифры или подчеркивания')
+        if User.objects.filter(username = username).exclude(pk = self.user.pk).exists():
+            raise forms.ValidationError('Это username уже занят')
+        return username
