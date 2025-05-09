@@ -46,13 +46,13 @@
                             </div>
                             <div class="modal-body">
                                 Вы уверены, что хотите удалить сотрудника "{{user.last_name }} {{ user.first_name }}"?
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
                                 <form action="{% url 'employee_delete' user_id=user.id %}" method="post" id="deleteForm">
                                     {% csrf_token %}
                                     <button type="submit" class="btn btn-danger">Удалить</button>
                                 </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
                             </div>
                         </div>
                     </div>
@@ -79,7 +79,7 @@
                         });
                     } else {
                         console.error('Delete form not found after modal shown');
-                        console.log('Modal content: ', document.querySelector('#deleteModal .modal-content').innerHTML);
+                        console.log('Modal content: ', document.querySelector('#deleteModal .modal-body').innerHTML);
                         console.log('All forms in modal: ', document.querySelectorAll('#deleteModal form').length);
                     }
                 });
