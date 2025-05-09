@@ -385,6 +385,8 @@ def task_delete(request, pk):
 def employee_delete(request, user_id):
     user = get_object_or_404(User, id = user_id, groups__name = 'Сотрудники')
     if request.method == 'POST':
+        print(f"Deleting user {user.username} (ID: {user.id})")
         user.delete()
         return redirect('employee_list')
+    print('Received GET request, redirecting to emplpoyee_edit')
     return redirect('employee_edit', user_id = user_id)
