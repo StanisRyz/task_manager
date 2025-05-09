@@ -379,3 +379,12 @@ def task_delete(request, pk):
         task.delete()
         return redirect('task_list')
     return redirect('task_detail', pk = pk)
+
+@login_required
+@user_passes_test(is_manager, login_url = 'task_list')
+def employee_delete(request, user_id):
+    user = get_object_or_404(User, id = user_id, groups__name = 'Сотрудники')
+    if request.method == 'POST':
+        user.delete()
+        return redirect('employee_list')
+    return redirect('employee_edit', user_id = user_id)
