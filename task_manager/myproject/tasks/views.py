@@ -384,10 +384,7 @@ def task_delete(request, pk):
 @user_passes_test(is_manager, login_url = 'task_list')
 def employee_delete(request, user_id):
     user = get_object_or_404(User, id = user_id, groups__name = 'Сотрудники')
-    print(f"Received request to delete {user.username} ID: {user_id} method: {request.method}")
     if request.method == 'POST':
-        print(f"Deleting user {user.username} (ID: {user.id})")
         user.delete()
         return redirect('employee_list')
-    print('Received GET request, redirecting to emplpoyee_edit')
     return redirect('employee_edit', user_id = user_id)
