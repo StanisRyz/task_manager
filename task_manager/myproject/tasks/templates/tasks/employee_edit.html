@@ -65,10 +65,14 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const deleteForm = document.getElementById('deleteForm');
-            deleteForm.addEventListener('submit', (event) => {
-                console.log('Submitting delete form with method: ', deleteForm.method);
-                console.log('Form action: ', deleteForm.action);
-            });
+            if (deleteForm) {
+                deleteForm.addEventListener('submit', (event) => {
+                    console.log('Submitting delete form with method: ', deleteForm.method);
+                    console.log('Form action: ', deleteForm.action);
+                });
+            } else {
+                console.error('Delete form not found');
+            }
         });
     </script>
 {% endblock %}
