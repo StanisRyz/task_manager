@@ -35,8 +35,8 @@
                         <div class="invalid-feedback d-block">{{ form.password.errors }}</div>
                     {% endif %}
                 </div>
-                <button type="submit" class="btn btn-primary">Сохранить</button>
-                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">Удалить</button>
+                <button type="submit" class="btn btn-primary me-2">Сохранить</button>
+                <button type="button" class="btn btn-danger me-2" data-bs-toggle="modal" data-bs-target="#deleteModal">Удалить</button>
                 <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
@@ -49,7 +49,7 @@
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-                                <form action="{% url 'employee_delete' user_id=user.id %}" method="post" style="display:inline;">
+                                <form action="{% url 'employee_delete' user_id=user.id %}" method="post" id="deleteForm" style="display:inline;">
                                     {% csrf_token %}
                                     <button type="submit" class="btn btn-danger">Удалить</button>
                                 </form>
@@ -61,4 +61,14 @@
             </form>
         </div>
     </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const deleteForm = document.getElementById('deleteForm');
+            deleteForm.addEventListener('submit', (event) => {
+                console.log('Submitting delete form with method: ', deleteForm.method);
+                console.log('Form action: ', deleteForm.action);
+            });
+        });
+    </script>
 {% endblock %}
