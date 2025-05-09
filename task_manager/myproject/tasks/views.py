@@ -383,7 +383,6 @@ def task_delete(request, pk):
 @login_required
 @user_passes_test(is_manager, login_url = 'task_list')
 def employee_delete(request, user_id):
-    print('hahaha')
     user = get_object_or_404(User, id = user_id, groups__name = 'Сотрудники')
     print(f"Received request to delete {user.username} ID: {user_id} method: {request.method}")
     if request.method == 'POST':

@@ -49,7 +49,7 @@
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-                                <form action="{% url 'employee_delete' user_id=user.id %}" method="post" id="deleteForm" style="display:inline;">
+                                <form action="{% url 'employee_delete' user_id=user.id %}" method="post" id="deleteForm">
                                     {% csrf_token %}
                                     <button type="submit" class="btn btn-danger">Удалить</button>
                                 </form>
@@ -64,14 +64,27 @@
     
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const deleteForm = document.getElementById('deleteForm');
-            if (deleteForm) {
-                deleteForm.addEventListener('submit', (event) => {
-                    console.log('Submitting delete form with method: ', deleteForm.method);
-                    console.log('Form action: ', deleteForm.action);
+            console.log('DOM loaded, searching for deleteModal');
+            const deleteModal = document.getElementById('deleteModal');
+            if (deleteModal) {
+                console.log('deleteModal found, attaching shown.bs.modal listener');
+                deleteModal.addEventListener('shown.bs.modal', () => {
+                    console.log('Modal shown, searching for deleteForm');
+                    const deleteForm = document.getElementById('deleteForm');
+                    if (deleteForm) {
+                        console.log('deleteForm found, attaching submit listener');
+                        deleteForm.addEventListener('submit', (event) => {
+                            console.log('Submitting delete form with method: ', deleteForm.method);
+                            console.log('Form action: ', deleteForm.action);
+                        });
+                    } else {
+                        console.error('Delete form not found after modal shown');
+                        console.log('Modal content: ', document.querySelector('#deleteModal .modal-content').innerHTML);
+                        console.log('All forms in modal: ', document.querySelectorAll('#deleteModal form').length);
+                    }
                 });
             } else {
-                console.error('Delete form not found');
+                console.error('Delete modal not found');
             }
         });
     </script>
