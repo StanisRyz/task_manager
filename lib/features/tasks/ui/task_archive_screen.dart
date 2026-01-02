@@ -12,6 +12,11 @@ class TaskArchiveScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final archived = ref.watch(tasksControllerProvider).archived;
+    final scheme = Theme.of(context).colorScheme;
+    final isDark = scheme.brightness == Brightness.dark;
+    final cardColor = isDark
+        ? scheme.surfaceContainerHighest
+        : scheme.surfaceContainerLow;
     final dateFormat = DateFormat('dd.MM.yyyy');
 
     return Scaffold(
@@ -41,7 +46,7 @@ class TaskArchiveScreen extends ConsumerWidget {
                     : 'Архив: ${dateFormat.format(task.completedAt!)}';
 
                 return Material(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  color: cardColor,
                   borderRadius: BorderRadius.circular(16),
                   child: InkWell(
                     borderRadius: BorderRadius.circular(16),
