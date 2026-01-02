@@ -98,6 +98,11 @@ class TaskListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tasks = ref.watch(tasksControllerProvider);
+    final scheme = Theme.of(context).colorScheme;
+    final isDark = scheme.brightness == Brightness.dark;
+    final cardColor = isDark
+        ? scheme.surfaceContainerHighest
+        : scheme.surfaceContainerLow;
     final visibleTasks =
         tasks.where((task) => task.status != TaskStatus.done).toList();
     final dateFormat = DateFormat('dd.MM.yyyy');
@@ -201,8 +206,7 @@ class TaskListScreen extends ConsumerWidget {
                     : _formatDueLabel(task.dueAt!, dateFormat);
 
                 return Material(
-                  color:
-                      Theme.of(context).colorScheme.surfaceContainerHighest,
+                  color: cardColor,
                   borderRadius: BorderRadius.circular(16),
                   child: InkWell(
                     borderRadius: BorderRadius.circular(16),
