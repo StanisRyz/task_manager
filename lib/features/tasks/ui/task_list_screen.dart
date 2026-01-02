@@ -320,6 +320,7 @@ class TaskListScreen extends ConsumerWidget {
             ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
+          ref.read(taskTagFilterProvider.notifier).state = null;
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (_) => const TaskEditorScreen(),
