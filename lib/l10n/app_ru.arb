@@ -1,0 +1,71 @@
+{
+  "@@locale": "ru",
+  "appTitle": "Задачи",
+  "settingsTitle": "Настройки",
+  "settingsThemeDark": "Тёмная тема",
+  "settingsLanguage": "Язык",
+  "languageRussian": "Русский",
+  "languageEnglish": "Английский",
+  "filtersTitle": "Фильтры",
+  "tagsTitle": "Теги",
+  "allTags": "Все теги",
+  "noTags": "Теги пока не добавлены",
+  "apply": "Применить",
+  "archiveTitle": "Архив",
+  "backToTasks": "К задачам",
+  "archiveEmpty": "Архив пуст",
+  "archivedOn": "Архив: {date}",
+  "@archivedOn": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "tasksTitle": "Задачи",
+  "filterTooltip": "Фильтры",
+  "sortTooltip": "Сортировка",
+  "archiveTooltip": "Архив",
+  "settingsTooltip": "Настройки",
+  "tasksEmpty": "Задач пока нет",
+  "sortAscending": "По возрастанию срока",
+  "sortDescending": "По убыванию срока",
+  "remainingDays": "осталось {days, plural, one{# день} few{# дня} many{# дней} other{# дня}}",
+  "@remainingDays": {
+    "placeholders": {
+      "days": {}
+    }
+  },
+  "dueLabel": "Срок: {date} ({remaining})",
+  "@dueLabel": {
+    "placeholders": {
+      "date": {},
+      "remaining": {}
+    }
+  },
+  "newTask": "Новая задача",
+  "markCompletedTitle": "Отметить выполненной",
+  "markCompletedMessage": "Перенести задачу в архив?",
+  "no": "Нет",
+  "yes": "Да",
+  "taskNewTitle": "Новая задача",
+  "taskEditTitle": "Редактирование",
+  "titleLabel": "Название",
+  "titleRequired": "Введите название задачи",
+  "descriptionLabel": "Описание",
+  "descriptionRequired": "Введите описание задачи",
+  "statusLabel": "Статус",
+  "statusPlanned": "Запланировано",
+  "statusInProgress": "В работе",
+  "statusDone": "Выполнено",
+  "dueDateRequired": "Укажите срок",
+  "dueDateInvalid": "Срок должен быть не раньше завтрашнего дня",
+  "dueDateTitle": "Срок",
+  "dueDateNotSet": "Не задан",
+  "clearDate": "Очистить дату",
+  "pickDate": "Выбрать дату",
+  "tagsLabel": "Теги (через запятую)",
+  "attachmentsTitle": "Вложения",
+  "attachmentLabel": "Добавить вложение (строка)",
+  "add": "Добавить",
+  "noAttachments": "Вложений нет",
+  "save": "Сохранить"
+}
