@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 class SwipeBackWrapper extends StatefulWidget {
   const SwipeBackWrapper({
     super.key,
     required this.child,
-    this.edgeWidth = 24,
     this.dragThreshold = 80,
     this.velocityThreshold = 800,
   });
 
   final Widget child;
-  final double edgeWidth;
   final double dragThreshold;
   final double velocityThreshold;
 
@@ -22,15 +21,35 @@ class _SwipeBackWrapperState extends State<SwipeBackWrapper> {
   double _dragDistance = 0;
   bool _canDrag = false;
 
-  void _handleDragStart(DragStartDetails details) {
-    final box = context.findRenderObject() as RenderBox?;
-    final width = box?.size.width ?? MediaQuery.of(context).size.width;
-    final isLtr = Directionality.of(context) == TextDirection.ltr;
-    final startOffset = isLtr
-        ? details.localPosition.dx
-        : width - details.localPosition.dx;
+  bool _isInteractiveInput(Offset globalPosition) {
+    final result = HitTestResult();
+    final view = View.of(context);
+    WidgetsBinding.instance.hitTestInView(result, globalPosition, view);
+    for (final entry in result.path) {
+      final target = entry.target;
+      if (target is RenderEditable) {
+        return true;
+      }
+      final debugCreator = (target as RenderObject).debugCreator;
+      if (debugCreator is DebugCreator) {
+        final widget = debugCreator.element.widget;
+        if (widget is TextField ||
+            widget is TextFormField ||
+            widget is EditableText ||
+            widget is Slider ||
+            widget is RangeSlider ||
+            widget is Switch ||
+            widget is Checkbox ||
+            widget is Radio) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
 
-    _canDrag = startOffset <= widget.edgeWidth;
+  void _handleDragStart(DragStartDetails details) {
+    _canDrag = !_isInteractiveInput(details.globalPosition);
     _dragDistance = 0;
   }
 
