@@ -181,7 +181,7 @@ class TaskListScreen extends ConsumerWidget {
           : ListView.separated(
               padding: const EdgeInsets.all(16),
               itemCount: sortedTasks.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              separatorBuilder: (_, _) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
                 final task = sortedTasks[index];
                 final dueLabel = task.dueAt == null
@@ -306,9 +306,6 @@ class TaskListScreen extends ConsumerWidget {
                 );
               },
             ),
-          );
-        },
-      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           Navigator.of(context).push(
