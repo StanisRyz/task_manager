@@ -24,6 +24,10 @@ class SettingsScreen extends ConsumerWidget {
         label: l10n.languageEnglish,
       ),
     ];
+    final orderedLanguageOptions = [
+      ...languageOptions.where((option) => option.locale == locale),
+      ...languageOptions.where((option) => option.locale != locale),
+    ];
 
     return SwipeBackWrapper(
       child: Scaffold(
@@ -73,7 +77,7 @@ class SettingsScreen extends ConsumerWidget {
               child: DropdownButtonFormField<Locale>(
                 initialValue: locale,
                 decoration: const InputDecoration(),
-                items: languageOptions
+                items: orderedLanguageOptions
                     .map(
                       (option) => DropdownMenuItem(
                         value: option.locale,
