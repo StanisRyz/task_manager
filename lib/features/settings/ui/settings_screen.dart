@@ -37,27 +37,23 @@ class SettingsScreen extends ConsumerWidget {
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ),
-          RadioListTile<Locale>(
-            value: const Locale('ru'),
+          RadioGroup<Locale>(
             groupValue: locale,
-            title: Text(l10n.languageRussian),
             onChanged: (value) {
-              if (value == null) {
-                return;
-              }
               ref.read(localeProvider.notifier).setLocale(value);
             },
-          ),
-          RadioListTile<Locale>(
-            value: const Locale('en'),
-            groupValue: locale,
-            title: Text(l10n.languageEnglish),
-            onChanged: (value) {
-              if (value == null) {
-                return;
-              }
-              ref.read(localeProvider.notifier).setLocale(value);
-            },
+            child: Column(
+              children: [
+                RadioListTile<Locale>(
+                  value: const Locale('ru'),
+                  title: Text(l10n.languageRussian),
+                ),
+                RadioListTile<Locale>(
+                  value: const Locale('en'),
+                  title: Text(l10n.languageEnglish),
+                ),
+              ],
+            ),
           ),
         ],
       ),

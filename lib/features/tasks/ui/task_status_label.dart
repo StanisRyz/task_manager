@@ -1,4 +1,4 @@
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:task_manager/gen_l10n/app_localizations.dart';
 
 import '../data/task.dart';
 
