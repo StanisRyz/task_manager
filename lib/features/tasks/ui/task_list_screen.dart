@@ -29,6 +29,27 @@ final taskSortProvider =
 
 final taskTagFilterProvider = StateProvider<String?>((ref) => null);
 
+enum TaskDeadlineSort {
+  ascending,
+  descending,
+}
+
+extension TaskDeadlineSortLabel on TaskDeadlineSort {
+  String get label {
+    switch (this) {
+      case TaskDeadlineSort.ascending:
+        return 'По возрастанию срока';
+      case TaskDeadlineSort.descending:
+        return 'По убыванию срока';
+    }
+  }
+}
+
+final taskSortProvider =
+    StateProvider<TaskDeadlineSort>((ref) => TaskDeadlineSort.ascending);
+
+final taskTagFilterProvider = StateProvider<String?>((ref) => null);
+
 class TaskListScreen extends ConsumerWidget {
   const TaskListScreen({super.key});
 
@@ -109,6 +130,7 @@ class TaskListScreen extends ConsumerWidget {
         tagCounts[tag] = (tagCounts[tag] ?? 0) + 1;
       }
     }
+    final sortedTags = tagCounts.keys.toList()..sort();
     if (selectedTag != null && !tagCounts.containsKey(selectedTag)) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ref.read(taskTagFilterProvider.notifier).state = null;
@@ -182,125 +204,122 @@ class TaskListScreen extends ConsumerWidget {
               separatorBuilder: (_, __) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
                 final task = sortedTasks[index];
-                final dueLabel = task.dueAt == null
-                    ? null
-                    : _formatDueLabel(task.dueAt!, dateFormat);
+          final dueLabel = task.dueAt == null
+              ? null
+              : _formatDueLabel(task.dueAt!, dateFormat);
 
                 return Material(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(16),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(16),
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => TaskEditorScreen(task: task),
-                        ),
-                      );
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  task.title,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium
-                                      ?.copyWith(
-                                        decoration: task.status ==
-                                                TaskStatus.done
-                                            ? TextDecoration.lineThrough
-                                            : null,
-                                      ),
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  task.status.label,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .labelLarge
-                                      ?.copyWith(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .primary,
-                                      ),
-                                ),
-                                if (dueLabel != null) ...[
-                                  const SizedBox(height: 4),
-                                  Text(dueLabel),
-                                ],
-                                if (task.tags.isNotEmpty) ...[
-                                  const SizedBox(height: 8),
-                                  Wrap(
-                                    spacing: 6,
-                                    runSpacing: -6,
-                                    children: task.tags
-                                        .map(
-                                          (tag) => Chip(
-                                            label: Text('#$tag'),
-                                            visualDensity:
-                                                VisualDensity.compact,
-                                          ),
-                                        )
-                                        .toList(),
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Checkbox(
-                            value: task.status == TaskStatus.done,
-                            onChanged: (value) async {
-                              if (value != true) {
-                                return;
-                              }
-                              final shouldComplete =
-                                  await showDialog<bool>(
-                                context: context,
-                                builder: (dialogContext) => AlertDialog(
-                                  title: const Text('Отметить выполненной'),
-                                  content: const Text(
-                                    'Перенести задачу в архив?',
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.of(dialogContext)
-                                            .pop(false);
-                                      },
-                                      child: const Text('Нет'),
-                                    ),
-                                    FilledButton(
-                                      onPressed: () {
-                                        Navigator.of(dialogContext)
-                                            .pop(true);
-                                      },
-                                      child: const Text('Да'),
-                                    ),
-                                  ],
-                                ),
-                              );
-                              if (shouldComplete == true) {
-                                await ref
-                                    .read(tasksControllerProvider.notifier)
-                                    .toggleDone(task.id);
-                              }
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(16),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => TaskEditorScreen(task: task),
                   ),
                 );
               },
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            task.title,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
+                                  decoration: task.status == TaskStatus.done
+                                      ? TextDecoration.lineThrough
+                                      : null,
+                                ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            task.status.label,
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelLarge
+                                ?.copyWith(
+                                  color:
+                                      Theme.of(context).colorScheme.primary,
+                                ),
+                          ),
+                          if (dueLabel != null) ...[
+                            const SizedBox(height: 4),
+                            Text(dueLabel),
+                          ],
+                          if (task.tags.isNotEmpty) ...[
+                            const SizedBox(height: 8),
+                            Wrap(
+                              spacing: 6,
+                              runSpacing: -6,
+                              children: task.tags
+                                  .map(
+                                    (tag) => Chip(
+                                      label: Text('#$tag'),
+                                      visualDensity: VisualDensity.compact,
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Checkbox(
+                      value: task.status == TaskStatus.done,
+                      onChanged: (value) async {
+                        if (value != true) {
+                          return;
+                        }
+                        final shouldComplete = await showDialog<bool>(
+                          context: context,
+                          builder: (dialogContext) => AlertDialog(
+                            title: const Text('Отметить выполненной'),
+                            content: const Text(
+                              'Перенести задачу в архив?',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(dialogContext).pop(false);
+                                },
+                                child: const Text('Нет'),
+                              ),
+                              FilledButton(
+                                onPressed: () {
+                                  Navigator.of(dialogContext).pop(true);
+                                },
+                                child: const Text('Да'),
+                              ),
+                            ],
+                          ),
+                        );
+                        if (shouldComplete == true) {
+                          await ref
+                              .read(tasksControllerProvider.notifier)
+                              .toggleDone(task.id);
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
             ),
+                );
+              },
+            ),
+          );
+        },
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           Navigator.of(context).push(
