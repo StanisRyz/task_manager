@@ -39,27 +39,26 @@ class SettingsScreen extends ConsumerWidget {
                 style: Theme.of(context).textTheme.titleMedium,
               ),
             ),
-            RadioListTile<ThemeMode>(
-              value: ThemeMode.light,
+            RadioGroup<ThemeMode>(
               groupValue: themeMode,
-              title: Text(l10n.settingsThemeLight),
               onChanged: (value) {
                 if (value == null) {
                   return;
                 }
                 ref.read(themeModeProvider.notifier).state = value;
               },
-            ),
-            RadioListTile<ThemeMode>(
-              value: ThemeMode.dark,
-              groupValue: themeMode,
-              title: Text(l10n.settingsThemeDark),
-              onChanged: (value) {
-                if (value == null) {
-                  return;
-                }
-                ref.read(themeModeProvider.notifier).state = value;
-              },
+              child: Column(
+                children: [
+                  RadioListTile<ThemeMode>(
+                    value: ThemeMode.light,
+                    title: Text(l10n.settingsThemeLight),
+                  ),
+                  RadioListTile<ThemeMode>(
+                    value: ThemeMode.dark,
+                    title: Text(l10n.settingsThemeDark),
+                  ),
+                ],
+              ),
             ),
             const Divider(height: 1),
             Padding(
@@ -72,7 +71,7 @@ class SettingsScreen extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: DropdownButtonFormField<Locale>(
-                value: locale,
+                initialValue: locale,
                 decoration: const InputDecoration(),
                 items: languageOptions
                     .map(
