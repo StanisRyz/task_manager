@@ -1,3 +1,4 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -23,6 +24,23 @@ final _singleLineAllowedCharacters =
     RegExp(r'[\p{L}\p{M}\p{N}\p{P}\p{S}\p{Z}]', unicode: true);
 final _multiLineAllowedCharacters =
     RegExp(r'[\p{L}\p{M}\p{N}\p{P}\p{S}\p{Z}\n]', unicode: true);
+const _documentExtensions = <String>[
+  'pdf',
+  'doc',
+  'docx',
+  'txt',
+  'rtf',
+  'xls',
+  'xlsx',
+  'ppt',
+  'pptx',
+];
+
+enum AttachmentType {
+  photo,
+  video,
+  document,
+}
 
 class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
   final _formKey = GlobalKey<FormState>();
@@ -40,6 +58,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
   late TaskStatus _status;
   DateTime? _dueAt;
   late List<String> _attachments;
+  AttachmentType _attachmentType = AttachmentType.photo;
 
   @override
   void initState() {
@@ -112,19 +131,44 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
     _dueDateFieldKey.currentState?.validate();
   }
 
+  bool _addAttachmentValue(String value) {
+    if (value.isEmpty || _attachments.contains(value)) {
+      return false;
+    }
+    setState(() {
+      _attachments.add(value);
+    });
+    return true;
+  }
+
   void _addAttachment() {
     final value = _attachmentController.text.trim();
     if (value.isEmpty) {
       return;
     }
-    if (_attachments.contains(value)) {
-      _attachmentController.clear();
+    _addAttachmentValue(value);
+    _attachmentController.clear();
+  }
+
+  Future<void> _pickAttachment(AttachmentType type) async {
+    final result = await FilePicker.platform.pickFiles(
+      type: type == AttachmentType.document
+          ? FileType.custom
+          : type == AttachmentType.photo
+              ? FileType.image
+              : FileType.video,
+      allowedExtensions:
+          type == AttachmentType.document ? _documentExtensions : null,
+    );
+    if (result == null) {
       return;
     }
-    setState(() {
-      _attachments.add(value);
-      _attachmentController.clear();
-    });
+    final selected = result.files.single;
+    final value = selected.path ?? selected.name;
+    if (value.isEmpty) {
+      return;
+    }
+    _addAttachmentValue(value);
   }
 
   List<String> _parseTags(String raw) {
@@ -429,6 +473,50 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: DropdownButtonFormField<AttachmentType>(
+                        value: _attachmentType,
+                        decoration: InputDecoration(
+                          labelText: l10n.attachmentTypeLabel,
+                        ),
+                        items: AttachmentType.values
+                            .map(
+                              (type) => DropdownMenuItem(
+                                value: type,
+                                child: Text(
+                                  switch (type) {
+                                    AttachmentType.photo =>
+                                      l10n.attachmentTypePhoto,
+                                    AttachmentType.video =>
+                                      l10n.attachmentTypeVideo,
+                                    AttachmentType.document =>
+                                      l10n.attachmentTypeDocument,
+                                  },
+                                ),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (value) {
+                          if (value == null) {
+                            return;
+                          }
+                          setState(() {
+                            _attachmentType = value;
+                          });
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    FilledButton.icon(
+                      onPressed: () => _pickAttachment(_attachmentType),
+                      icon: const Icon(Icons.attach_file),
+                      label: Text(l10n.addAttachmentFile),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
                 Row(
                   children: [
                     Expanded(
