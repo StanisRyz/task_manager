@@ -46,6 +46,8 @@
   "newTask": "Новая задача",
   "markCompletedTitle": "Отметить выполненной",
   "markCompletedMessage": "Перенести задачу в архив?",
+  "deleteTaskMessage": "Вы точно хотите удалить задачу?",
+  "deleteTaskTooltip": "Удалить задачу",
   "no": "Нет",
   "yes": "Да",
   "taskNewTitle": "Новая задача",

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 
@@ -44,6 +46,15 @@ class TasksRepository {
 
   Future<void> delete(String id) async {
     try {
+      final task = _box.get(id);
+      if (task != null) {
+        for (final attachment in task.attachments) {
+          final file = File(attachment);
+          if (await file.exists()) {
+            await file.delete();
+          }
+        }
+      }
       await _box.delete(id);
     } catch (error, stackTrace) {
       debugPrint('Не удалось удалить задачу: $error');
