@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
@@ -17,6 +18,7 @@ class TaskEditorScreen extends ConsumerStatefulWidget {
 
 class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _dueDateFieldKey = GlobalKey<FormFieldState<DateTime>>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _tagsController = TextEditingController();
@@ -47,13 +49,35 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
     super.dispose();
   }
 
+  DateTime _tomorrowDate() {
+    final now = DateTime.now();
+    return DateTime(now.year, now.month, now.day).add(const Duration(days: 1));
+  }
+
+  bool _isDueDateValid(DateTime? dueAt) {
+    if (dueAt == null) {
+      return false;
+    }
+    return !dueAt.isBefore(_tomorrowDate());
+  }
+
+  List<TaskStatus> get _statusOptions {
+    if (widget.task == null) {
+      return [TaskStatus.planned, TaskStatus.inProgress];
+    }
+    return TaskStatus.values;
+  }
+
   Future<void> _pickDate() async {
     final now = DateTime.now();
-    final initial = _dueAt ?? now;
+    final minDate = _tomorrowDate();
+    final initial = _dueAt != null && !_dueAt!.isBefore(minDate)
+        ? _dueAt!
+        : minDate;
     final picked = await showDatePicker(
       context: context,
       initialDate: initial,
-      firstDate: DateTime(now.year - 1),
+      firstDate: minDate,
       lastDate: DateTime(now.year + 10),
       locale: const Locale('ru'),
     );
@@ -61,6 +85,8 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
       setState(() {
         _dueAt = DateTime(picked.year, picked.month, picked.day);
       });
+      _dueDateFieldKey.currentState?.didChange(_dueAt);
+      _dueDateFieldKey.currentState?.validate();
     }
   }
 
@@ -68,6 +94,8 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
     setState(() {
       _dueAt = null;
     });
+    _dueDateFieldKey.currentState?.didChange(_dueAt);
+    _dueDateFieldKey.currentState?.validate();
   }
 
   void _addAttachment() {
@@ -109,9 +137,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
     final task = Task(
       id: existing?.id ?? const Uuid().v4(),
       title: _titleController.text.trim(),
-      description: _descriptionController.text.trim().isEmpty
-          ? null
-          : _descriptionController.text.trim(),
+      description: _descriptionController.text.trim(),
       dueAt: _dueAt,
       status: status,
       tags: _parseTags(_tagsController.text),
@@ -162,7 +188,19 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                 decoration: const InputDecoration(
                   labelText: 'Описание',
                 ),
-                maxLines: 4,
+                keyboardType: TextInputType.multiline,
+                minLines: 1,
+                maxLines: null,
+                maxLength: 100,
+                inputFormatters: [
+                  LengthLimitingTextInputFormatter(100),
+                ],
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Введите описание задачи';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<TaskStatus>(
@@ -170,7 +208,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                 decoration: const InputDecoration(
                   labelText: 'Статус',
                 ),
-                items: TaskStatus.values
+                items: _statusOptions
                     .map(
                       (status) => DropdownMenuItem(
                         value: status,
@@ -188,26 +226,61 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                 },
               ),
               const SizedBox(height: 16),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Срок'),
-                subtitle: Text(dueLabel),
-                trailing: Wrap(
-                  spacing: 8,
-                  children: [
-                    if (_dueAt != null)
-                      IconButton(
-                        tooltip: 'Очистить дату',
-                        onPressed: _clearDueDate,
-                        icon: const Icon(Icons.clear),
+              FormField<DateTime>(
+                key: _dueDateFieldKey,
+                initialValue: _dueAt,
+                validator: (value) {
+                  if (value == null) {
+                    return 'Укажите срок';
+                  }
+                  if (!_isDueDateValid(value)) {
+                    return 'Срок должен быть не раньше завтрашнего дня';
+                  }
+                  return null;
+                },
+                builder: (state) {
+                  final errorText = state.errorText;
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: const Text('Срок'),
+                        subtitle: Text(dueLabel),
+                        trailing: Wrap(
+                          spacing: 8,
+                          children: [
+                            if (_dueAt != null)
+                              IconButton(
+                                tooltip: 'Очистить дату',
+                                onPressed: _clearDueDate,
+                                icon: const Icon(Icons.clear),
+                              ),
+                            IconButton(
+                              tooltip: 'Выбрать дату',
+                              onPressed: _pickDate,
+                              icon: const Icon(Icons.event),
+                            ),
+                          ],
+                        ),
                       ),
-                    IconButton(
-                      tooltip: 'Выбрать дату',
-                      onPressed: _pickDate,
-                      icon: const Icon(Icons.event),
-                    ),
-                  ],
-                ),
+                      if (errorText != null)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 16),
+                          child: Text(
+                            errorText,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(
+                                  color:
+                                      Theme.of(context).colorScheme.error,
+                                ),
+                          ),
+                        ),
+                    ],
+                  );
+                },
               ),
               const Divider(height: 32),
               TextField(
