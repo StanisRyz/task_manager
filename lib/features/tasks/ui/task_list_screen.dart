@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../settings/ui/settings_screen.dart';
 import '../data/task.dart';
 import '../state/tasks_controller.dart';
 import 'task_archive_screen.dart';
@@ -168,6 +169,17 @@ class TaskListScreen extends ConsumerWidget {
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (_) => const TaskArchiveScreen(),
+                ),
+              );
+            },
+          ),
+          IconButton(
+            tooltip: 'Настройки',
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const SettingsScreen(),
                 ),
               );
             },
