@@ -113,6 +113,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get markCompletedMessage => 'Перенести задачу в архив?';
 
   @override
+  String get deleteTaskMessage => 'Вы точно хотите удалить задачу?';
+
+  @override
+  String get deleteTaskTooltip => 'Удалить задачу';
+
+  @override
   String get no => 'Нет';
 
   @override

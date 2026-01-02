@@ -278,6 +278,18 @@ abstract class AppLocalizations {
   /// **'Перенести задачу в архив?'**
   String get markCompletedMessage;
 
+  /// No description provided for @deleteTaskMessage.
+  ///
+  /// In ru, this message translates to:
+  /// **'Вы точно хотите удалить задачу?'**
+  String get deleteTaskMessage;
+
+  /// No description provided for @deleteTaskTooltip.
+  ///
+  /// In ru, this message translates to:
+  /// **'Удалить задачу'**
+  String get deleteTaskTooltip;
+
   /// No description provided for @no.
   ///
   /// In ru, this message translates to:
