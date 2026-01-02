@@ -7,24 +7,19 @@ final tasksRepositoryProvider = Provider<TasksRepository>((ref) {
   throw UnimplementedError('TasksRepository provider was not overridden.');
 });
 
-final tasksControllerProvider =
-    StateNotifierProvider<TasksController, TasksState>(
+final tasksControllerProvider = StateNotifierProvider<TasksController, List<Task>>(
   (ref) => TasksController(ref.watch(tasksRepositoryProvider)),
 );
 
-class TasksController extends StateNotifier<TasksState> {
-  TasksController(this._repository)
-      : super(const TasksState(active: [], archived: [])) {
+class TasksController extends StateNotifier<List<Task>> {
+  TasksController(this._repository) : super([]) {
     load();
   }
 
   final TasksRepository _repository;
 
   void load() {
-    state = TasksState(
-      active: _repository.getAll(),
-      archived: _repository.getArchived(),
-    );
+    state = _repository.getAll();
   }
 
   Future<void> upsert(Task task) async {
@@ -41,16 +36,4 @@ class TasksController extends StateNotifier<TasksState> {
     await _repository.toggleDone(id);
     load();
   }
-
-  Future<void> archiveTask(String id) async {
-    await _repository.archiveTask(id);
-    load();
-  }
-}
-
-class TasksState {
-  const TasksState({required this.active, required this.archived});
-
-  final List<Task> active;
-  final List<Task> archived;
 }

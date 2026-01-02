@@ -5,33 +5,18 @@ import 'package:intl/intl.dart';
 import '../data/task.dart';
 import '../state/tasks_controller.dart';
 import 'task_editor_screen.dart';
-import 'task_archive_screen.dart';
 
 class TaskListScreen extends ConsumerWidget {
   const TaskListScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tasksState = ref.watch(tasksControllerProvider);
-    final tasks = tasksState.active;
+    final tasks = ref.watch(tasksControllerProvider);
     final dateFormat = DateFormat('dd.MM.yyyy');
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Задачи'),
-        actions: [
-          IconButton(
-            tooltip: 'Архив',
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => const TaskArchiveScreen(),
-                ),
-              );
-            },
-            icon: const Icon(Icons.archive_outlined),
-          ),
-        ],
       ),
       body: tasks.isEmpty
           ? const Center(
@@ -40,7 +25,7 @@ class TaskListScreen extends ConsumerWidget {
           : ListView.separated(
               padding: const EdgeInsets.all(16),
               itemCount: tasks.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              separatorBuilder: (_, _) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
                 final task = tasks[index];
                 final dueLabel = task.dueAt == null
@@ -116,22 +101,10 @@ class TaskListScreen extends ConsumerWidget {
                           const SizedBox(width: 12),
                           Checkbox(
                             value: task.status == TaskStatus.done,
-                            onChanged: (value) async {
-                              if (value == null) {
-                                return;
-                              }
-                              final notifier =
-                                  ref.read(tasksControllerProvider.notifier);
-                              if (!value) {
-                                await notifier.toggleDone(task.id);
-                                return;
-                              }
-
-                              final shouldArchive =
-                                  await _confirmArchive(context);
-                              if (shouldArchive) {
-                                await notifier.archiveTask(task.id);
-                              }
+                            onChanged: (_) {
+                              ref
+                                  .read(tasksControllerProvider.notifier)
+                                  .toggleDone(task.id);
                             },
                           ),
                         ],
@@ -153,26 +126,5 @@ class TaskListScreen extends ConsumerWidget {
         label: const Text('Новая задача'),
       ),
     );
-  }
-
-  Future<bool> _confirmArchive(BuildContext context) async {
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Задача выполнена?'),
-        content: const Text('Переместить задачу в архив?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Нет'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Да'),
-          ),
-        ],
-      ),
-    );
-    return result ?? false;
   }
 }

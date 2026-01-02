@@ -119,7 +119,6 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
       createdAt: existing?.createdAt ?? now,
       updatedAt: now,
       completedAt: completedAt,
-      archivedAt: existing?.archivedAt,
     );
 
     await ref.read(tasksControllerProvider.notifier).upsert(task);
@@ -163,12 +162,11 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                 decoration: const InputDecoration(
                   labelText: 'Описание',
                 ),
-                minLines: 1,
-                maxLines: 6,
+                maxLines: 4,
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<TaskStatus>(
-                value: _status,
+                initialValue: _status,
                 decoration: const InputDecoration(
                   labelText: 'Статус',
                 ),
