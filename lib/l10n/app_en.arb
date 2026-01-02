@@ -46,6 +46,8 @@
   "newTask": "New task",
   "markCompletedTitle": "Mark as done",
   "markCompletedMessage": "Move the task to the archive?",
+  "deleteTaskMessage": "Are you sure you want to delete the task?",
+  "deleteTaskTooltip": "Delete task",
   "no": "No",
   "yes": "Yes",
   "taskNewTitle": "New task",

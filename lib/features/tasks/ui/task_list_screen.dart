@@ -119,6 +119,28 @@ class TaskListScreen extends ConsumerWidget {
     final selectedSort = ref.watch(taskSortProvider);
     final selectedTag = ref.watch(taskTagFilterProvider);
 
+    Future<void> confirmDelete(Task task) async {
+      final shouldDelete = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          content: Text(l10n.deleteTaskMessage),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(l10n.no),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: Text(l10n.yes),
+            ),
+          ],
+        ),
+      );
+      if (shouldDelete == true) {
+        await ref.read(tasksControllerProvider.notifier).delete(task.id);
+      }
+    }
+
     final tagCounts = <String, int>{};
     for (final task in visibleTasks) {
       for (final tag in task.tags) {
@@ -287,44 +309,54 @@ class TaskListScreen extends ConsumerWidget {
                             ),
                           ),
                           const SizedBox(width: 12),
-                          Checkbox(
-                            value: task.status == TaskStatus.done,
-                            onChanged: (value) async {
-                              if (value != true) {
-                                return;
-                              }
-                              final shouldComplete =
-                                  await showDialog<bool>(
-                                context: context,
-                                builder: (dialogContext) => AlertDialog(
-                                  title: Text(l10n.markCompletedTitle),
-                                  content: Text(l10n.markCompletedMessage),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.of(dialogContext)
-                                            .pop(false);
-                                      },
-                                      child: Text(l10n.no),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Checkbox(
+                                value: task.status == TaskStatus.done,
+                                onChanged: (value) async {
+                                  if (value != true) {
+                                    return;
+                                  }
+                                  final shouldComplete =
+                                      await showDialog<bool>(
+                                    context: context,
+                                    builder: (dialogContext) => AlertDialog(
+                                      title: Text(l10n.markCompletedTitle),
+                                      content: Text(l10n.markCompletedMessage),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.of(dialogContext)
+                                                .pop(false);
+                                          },
+                                          child: Text(l10n.no),
+                                        ),
+                                        FilledButton(
+                                          onPressed: () {
+                                            Navigator.of(dialogContext)
+                                                .pop(true);
+                                          },
+                                          child: Text(l10n.yes),
+                                        ),
+                                      ],
                                     ),
-                                    FilledButton(
-                                      onPressed: () {
-                                        Navigator.of(dialogContext)
-                                            .pop(true);
-                                      },
-                                      child: Text(l10n.yes),
-                                    ),
-                                  ],
-                                ),
-                              );
-                              if (shouldComplete == true) {
-                                await ref
-                                    .read(
-                                      tasksControllerProvider.notifier,
-                                    )
-                                    .toggleDone(task.id);
-                              }
-                            },
+                                  );
+                                  if (shouldComplete == true) {
+                                    await ref
+                                        .read(
+                                          tasksControllerProvider.notifier,
+                                        )
+                                        .toggleDone(task.id);
+                                  }
+                                },
+                              ),
+                              IconButton(
+                                tooltip: l10n.deleteTaskTooltip,
+                                icon: const Icon(Icons.delete_outline),
+                                onPressed: () => confirmDelete(task),
+                              ),
+                            ],
                           ),
                         ],
                       ),

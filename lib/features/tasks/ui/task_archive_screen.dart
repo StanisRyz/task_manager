@@ -24,6 +24,28 @@ class TaskArchiveScreen extends ConsumerWidget {
     final localeTag = Localizations.localeOf(context).toLanguageTag();
     final dateFormat = DateFormat('dd.MM.yyyy', localeTag);
 
+    Future<void> confirmDelete(Task task) async {
+      final shouldDelete = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          content: Text(l10n.deleteTaskMessage),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(l10n.no),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: Text(l10n.yes),
+            ),
+          ],
+        ),
+      );
+      if (shouldDelete == true) {
+        await ref.read(tasksControllerProvider.notifier).delete(task.id);
+      }
+    }
+
     return SwipeBackWrapper(
       child: Scaffold(
         appBar: AppBar(
@@ -67,49 +89,64 @@ class TaskArchiveScreen extends ConsumerWidget {
                       },
                       child: Padding(
                         padding: const EdgeInsets.all(16),
-                        child: Column(
+                        child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              task.title,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(
-                                    decoration: TextDecoration.lineThrough,
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    task.title,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          decoration:
+                                              TextDecoration.lineThrough,
+                                        ),
                                   ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              task.status.label(l10n),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelLarge
-                                  ?.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .primary,
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    task.status.label(l10n),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelLarge
+                                        ?.copyWith(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                        ),
                                   ),
-                            ),
-                            if (archivedLabel != null) ...[
-                              const SizedBox(height: 4),
-                              Text(archivedLabel),
-                            ],
-                            if (task.tags.isNotEmpty) ...[
-                              const SizedBox(height: 8),
-                              Wrap(
-                                spacing: 6,
-                                runSpacing: -6,
-                                children: task.tags
-                                    .map(
-                                      (tag) => Chip(
-                                        label: Text('#$tag'),
-                                        visualDensity: VisualDensity.compact,
-                                      ),
-                                    )
-                                    .toList(),
+                                  if (archivedLabel != null) ...[
+                                    const SizedBox(height: 4),
+                                    Text(archivedLabel),
+                                  ],
+                                  if (task.tags.isNotEmpty) ...[
+                                    const SizedBox(height: 8),
+                                    Wrap(
+                                      spacing: 6,
+                                      runSpacing: -6,
+                                      children: task.tags
+                                          .map(
+                                            (tag) => Chip(
+                                              label: Text('#$tag'),
+                                              visualDensity:
+                                                  VisualDensity.compact,
+                                            ),
+                                          )
+                                          .toList(),
+                                    ),
+                                  ],
+                                ],
                               ),
-                            ],
+                            ),
+                            const SizedBox(width: 12),
+                            IconButton(
+                              tooltip: l10n.deleteTaskTooltip,
+                              icon: const Icon(Icons.delete_outline),
+                              onPressed: () => confirmDelete(task),
+                            ),
                           ],
                         ),
                       ),

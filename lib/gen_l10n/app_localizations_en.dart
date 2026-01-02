@@ -111,6 +111,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get markCompletedMessage => 'Move the task to the archive?';
 
   @override
+  String get deleteTaskMessage => 'Are you sure you want to delete the task?';
+
+  @override
+  String get deleteTaskTooltip => 'Delete task';
+
+  @override
   String get no => 'No';
 
   @override
