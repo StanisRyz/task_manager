@@ -155,7 +155,7 @@ class TaskListScreen extends ConsumerWidget {
                 Expanded(
                   child: DropdownButtonFormField<TaskDeadlineSort>(
                     key: const Key('task-sort-dropdown'),
-                    value: selectedSort,
+                    initialValue: selectedSort,
                     decoration: const InputDecoration(
                       labelText: 'Сортировка',
                     ),
@@ -179,7 +179,7 @@ class TaskListScreen extends ConsumerWidget {
                 Expanded(
                   child: DropdownButtonFormField<String?>(
                     key: const Key('task-tag-dropdown'),
-                    value: selectedTag,
+                    initialValue: selectedTag,
                     decoration: const InputDecoration(
                       labelText: 'Теги',
                     ),
