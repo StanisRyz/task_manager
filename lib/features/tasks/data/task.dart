@@ -6,19 +6,6 @@ enum TaskStatus {
   done,
 }
 
-extension TaskStatusLabels on TaskStatus {
-  String get label {
-    switch (this) {
-      case TaskStatus.planned:
-        return 'Запланировано';
-      case TaskStatus.inProgress:
-        return 'В работе';
-      case TaskStatus.done:
-        return 'Выполнено';
-    }
-  }
-}
-
 class Task {
   Task({
     required this.id,

@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'app.dart';
+import 'features/settings/data/settings_repository.dart';
+import 'features/settings/state/locale_provider.dart';
 import 'features/tasks/data/task.dart';
 import 'features/tasks/data/tasks_repository.dart';
 import 'features/tasks/state/tasks_controller.dart';
@@ -14,12 +16,15 @@ Future<void> main() async {
   Hive.registerAdapter(TaskStatusAdapter());
   Hive.registerAdapter(TaskAdapter());
   final box = await Hive.openBox<Task>('tasks');
+  final settingsBox = await Hive.openBox<String>('settings');
   await resetTasksOnStartup(box);
 
   runApp(
     ProviderScope(
       overrides: [
         tasksRepositoryProvider.overrideWithValue(TasksRepository(box)),
+        settingsRepositoryProvider
+            .overrideWithValue(SettingsRepository(settingsBox)),
       ],
       child: const TaskManagerApp(),
     ),

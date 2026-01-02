@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../l10n/app_localizations_ext.dart';
 import '../data/task.dart';
 import '../state/tasks_controller.dart';
 
@@ -24,6 +25,7 @@ class _TaskFilterScreenState extends ConsumerState<TaskFilterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final tasks = ref.watch(tasksControllerProvider);
     final visibleTasks =
         tasks.where((task) => task.status != TaskStatus.done).toList();
@@ -40,7 +42,7 @@ class _TaskFilterScreenState extends ConsumerState<TaskFilterScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Фильтры'),
+        title: Text(l10n.filtersTitle),
       ),
       body: SafeArea(
         child: Column(
@@ -57,18 +59,18 @@ class _TaskFilterScreenState extends ConsumerState<TaskFilterScreen> {
                   padding: const EdgeInsets.all(16),
                   children: [
                     Text(
-                      'Теги',
+                      l10n.tagsTitle,
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     const SizedBox(height: 12),
-                    const RadioListTile<String?>(
+                    RadioListTile<String?>(
                       value: null,
-                      title: Text('Все теги'),
+                      title: Text(l10n.allTags),
                     ),
                     if (sortedTags.isEmpty)
-                      const Padding(
+                      Padding(
                         padding: EdgeInsets.symmetric(vertical: 12),
-                        child: Text('Теги пока не добавлены'),
+                        child: Text(l10n.noTags),
                       )
                     else
                       ...sortedTags.map(
@@ -85,12 +87,12 @@ class _TaskFilterScreenState extends ConsumerState<TaskFilterScreen> {
               padding: const EdgeInsets.all(16),
               child: SizedBox(
                 width: double.infinity,
-              child: FilledButton(
-                key: const Key('task-filter-apply'),
-                onPressed: () {
-                  Navigator.of(context).pop(_selectedTag);
-                },
-                  child: const Text('Применить'),
+                child: FilledButton(
+                  key: const Key('task-filter-apply'),
+                  onPressed: () {
+                    Navigator.of(context).pop(_selectedTag);
+                  },
+                  child: Text(l10n.apply),
                 ),
               ),
             ),
