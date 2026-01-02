@@ -138,6 +138,9 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
 
   String _currentTagPrefix(String text, int cursor) {
     final safeCursor = cursor.clamp(0, text.length);
+    if (safeCursor == 0) {
+      return '';
+    }
     final lastComma = text.lastIndexOf(',', safeCursor - 1);
     final start = lastComma == -1 ? 0 : lastComma + 1;
     return text.substring(start, safeCursor).trim();
@@ -438,6 +441,51 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                         itemCount: suggestions.length,
                         // ignore: unnecessary_underscores
                         separatorBuilder: (_, _) => const Divider(height: 1),
+                        itemBuilder: (context, index) {
+                          final tag = suggestions[index];
+                          final count = tagCounts[tag] ?? 0;
+                          return ListTile(
+                            title: Text('$tag ($count)'),
+                            onTap: () => _insertTagSuggestion(tag),
+                          );
+                        },
+                      ),
+                    ),
+                  );
+                },
+              ),
+              ValueListenableBuilder<TextEditingValue>(
+                valueListenable: _tagsController,
+                builder: (context, value, child) {
+                  final prefix = _currentTagPrefix(
+                    value.text,
+                    value.selection.baseOffset,
+                  ).toLowerCase();
+                  if (prefix.isEmpty) {
+                    return const SizedBox.shrink();
+                  }
+                  final usedTags = _parseTags(value.text).toSet();
+                  final suggestions = knownTags
+                      .where(
+                        (tag) =>
+                            tag.toLowerCase().startsWith(prefix) &&
+                            !usedTags.contains(tag.toLowerCase()),
+                      )
+                      .toList();
+                  if (suggestions.isEmpty) {
+                    return const SizedBox.shrink();
+                  }
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Material(
+                      elevation: 2,
+                      borderRadius: BorderRadius.circular(12),
+                      child: ListView.separated(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: suggestions.length,
+                        separatorBuilder: (_, __) => const Divider(height: 1),
                         itemBuilder: (context, index) {
                           final tag = suggestions[index];
                           final count = tagCounts[tag] ?? 0;
