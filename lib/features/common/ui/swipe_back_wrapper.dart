@@ -23,13 +23,26 @@ class _SwipeBackWrapperState extends State<SwipeBackWrapper> {
 
   bool _isInteractiveInput(Offset globalPosition) {
     final result = HitTestResult();
-    WidgetsBinding.instance.hitTest(result, globalPosition);
+    final view = View.of(context);
+    WidgetsBinding.instance.hitTestInView(result, globalPosition, view);
     for (final entry in result.path) {
       final target = entry.target;
-      if (target is RenderEditable ||
-          target is RenderSlider ||
-          target is RenderToggleable) {
+      if (target is RenderEditable) {
         return true;
+      }
+      final debugCreator = (target as RenderObject).debugCreator;
+      if (debugCreator is DebugCreator) {
+        final widget = debugCreator.element.widget;
+        if (widget is TextField ||
+            widget is TextFormField ||
+            widget is EditableText ||
+            widget is Slider ||
+            widget is RangeSlider ||
+            widget is Switch ||
+            widget is Checkbox ||
+            widget is Radio) {
+          return true;
+        }
       }
     }
     return false;
