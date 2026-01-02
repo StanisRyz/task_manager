@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../data/task.dart';
 import '../state/tasks_controller.dart';
+import 'task_archive_screen.dart';
 import 'task_editor_screen.dart';
 
 class TaskListScreen extends ConsumerWidget {
@@ -17,6 +18,19 @@ class TaskListScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Задачи'),
+        actions: [
+          IconButton(
+            tooltip: 'Архив',
+            icon: const Icon(Icons.archive_outlined),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const TaskArchiveScreen(),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: tasks.isEmpty
           ? const Center(
