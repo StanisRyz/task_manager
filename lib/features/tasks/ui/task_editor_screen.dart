@@ -166,7 +166,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<TaskStatus>(
-                value: _status,
+                initialValue: _status,
                 decoration: const InputDecoration(
                   labelText: 'Статус',
                 ),
