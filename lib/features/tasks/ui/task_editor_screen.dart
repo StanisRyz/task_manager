@@ -126,13 +126,14 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
     return parts;
   }
 
-  List<String> _collectTags(List<Task> tasks) {
-    final unique = <String>{};
+  Map<String, int> _collectTagCounts(List<Task> tasks) {
+    final counts = <String, int>{};
     for (final task in tasks) {
-      unique.addAll(task.tags);
+      for (final tag in task.tags) {
+        counts[tag] = (counts[tag] ?? 0) + 1;
+      }
     }
-    final tags = unique.toList()..sort();
-    return tags;
+    return counts;
   }
 
   String _currentTagPrefix(String text, int cursor) {
@@ -145,7 +146,8 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
   void _insertTagSuggestion(String suggestion) {
     final text = _tagsController.text;
     final selection = _tagsController.selection;
-    final cursor = selection.baseOffset == -1 ? text.length : selection.baseOffset;
+    final cursor =
+        selection.baseOffset == -1 ? text.length : selection.baseOffset;
     final safeCursor = cursor.clamp(0, text.length);
     final lastComma = text.lastIndexOf(',', safeCursor - 1);
     final start = lastComma == -1 ? 0 : lastComma + 1;
@@ -168,7 +170,8 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
     }
 
     final nextText = '$before$suggestion$after';
-    final nextCursor = (before.length + suggestion.length).clamp(0, nextText.length);
+    final nextCursor =
+        (before.length + suggestion.length).clamp(0, nextText.length);
     _tagsController.value = TextEditingValue(
       text: nextText,
       selection: TextSelection.collapsed(offset: nextCursor),
@@ -207,7 +210,8 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
   @override
   Widget build(BuildContext context) {
     final tasks = ref.watch(tasksControllerProvider);
-    final knownTags = _collectTags(tasks);
+    final tagCounts = _collectTagCounts(tasks);
+    final knownTags = tagCounts.keys.toList()..sort();
     final dateFormat = DateFormat('dd.MM.yyyy');
     final dueLabel = _dueAt == null
         ? 'Не задан'
@@ -396,6 +400,51 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                             );
                           },
                         ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+              ValueListenableBuilder<TextEditingValue>(
+                valueListenable: _tagsController,
+                builder: (context, value, child) {
+                  final prefix = _currentTagPrefix(
+                    value.text,
+                    value.selection.baseOffset,
+                  ).toLowerCase();
+                  if (prefix.isEmpty) {
+                    return const SizedBox.shrink();
+                  }
+                  final usedTags = _parseTags(value.text).toSet();
+                  final suggestions = knownTags
+                      .where(
+                        (tag) =>
+                            tag.toLowerCase().startsWith(prefix) &&
+                            !usedTags.contains(tag.toLowerCase()),
+                      )
+                      .toList();
+                  if (suggestions.isEmpty) {
+                    return const SizedBox.shrink();
+                  }
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Material(
+                      elevation: 2,
+                      borderRadius: BorderRadius.circular(12),
+                      child: ListView.separated(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: suggestions.length,
+                        separatorBuilder: (_, __) => const Divider(height: 1),
+                        itemBuilder: (context, index) {
+                          final tag = suggestions[index];
+                          final count = tagCounts[tag] ?? 0;
+                          return ListTile(
+                            title: Text('$tag ($count)'),
+                            onTap: () => _insertTagSuggestion(tag),
+                          );
+                        },
                       ),
                     ),
                   );
