@@ -181,7 +181,7 @@ class TaskListScreen extends ConsumerWidget {
           : ListView.separated(
               padding: const EdgeInsets.all(16),
               itemCount: sortedTasks.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              separatorBuilder: (_, _) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
                 final task = sortedTasks[index];
                 final dueLabel = task.dueAt == null
@@ -189,24 +189,21 @@ class TaskListScreen extends ConsumerWidget {
                     : _formatDueLabel(task.dueAt!, dateFormat);
 
                 return Material(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(16),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(16),
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => TaskEditorScreen(task: task),
-                  ),
-                );
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Column(
+                  color:
+                      Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(16),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(16),
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => TaskEditorScreen(task: task),
+                        ),
+                      );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
@@ -292,76 +289,23 @@ class TaskListScreen extends ConsumerWidget {
                                     ),
                                   ],
                                 ),
+                              );
+                              if (shouldComplete == true) {
+                                await ref
+                                    .read(
+                                      tasksControllerProvider.notifier,
+                                    )
+                                    .toggleDone(task.id);
+                              }
+                            },
                           ),
-                          if (dueLabel != null) ...[
-                            const SizedBox(height: 4),
-                            Text(dueLabel),
-                          ],
-                          if (task.tags.isNotEmpty) ...[
-                            const SizedBox(height: 8),
-                            Wrap(
-                              spacing: 6,
-                              runSpacing: -6,
-                              children: task.tags
-                                  .map(
-                                    (tag) => Chip(
-                                      label: Text('#$tag'),
-                                      visualDensity: VisualDensity.compact,
-                                    ),
-                                  )
-                                  .toList(),
-                            ),
-                          ],
                         ],
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Checkbox(
-                      value: task.status == TaskStatus.done,
-                      onChanged: (value) async {
-                        if (value != true) {
-                          return;
-                        }
-                        final shouldComplete = await showDialog<bool>(
-                          context: context,
-                          builder: (dialogContext) => AlertDialog(
-                            title: const Text('Отметить выполненной'),
-                            content: const Text(
-                              'Перенести задачу в архив?',
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(dialogContext).pop(false);
-                                },
-                                child: const Text('Нет'),
-                              ),
-                              FilledButton(
-                                onPressed: () {
-                                  Navigator.of(dialogContext).pop(true);
-                                },
-                                child: const Text('Да'),
-                              ),
-                            ],
-                          ),
-                        );
-                        if (shouldComplete == true) {
-                          await ref
-                              .read(tasksControllerProvider.notifier)
-                              .toggleDone(task.id);
-                        }
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ),
+                  ),
                 );
               },
             ),
-          );
-        },
-      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           Navigator.of(context).push(
