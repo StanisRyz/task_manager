@@ -7,8 +7,91 @@ import '../state/tasks_controller.dart';
 import 'task_archive_screen.dart';
 import 'task_editor_screen.dart';
 
+enum TaskDeadlineSort {
+  ascending,
+  descending,
+}
+
+extension TaskDeadlineSortLabel on TaskDeadlineSort {
+  String get label {
+    switch (this) {
+      case TaskDeadlineSort.ascending:
+        return 'По возрастанию срока';
+      case TaskDeadlineSort.descending:
+        return 'По убыванию срока';
+    }
+  }
+}
+
+final taskSortProvider =
+    StateProvider<TaskDeadlineSort>((ref) => TaskDeadlineSort.ascending);
+
+final taskTagFilterProvider = StateProvider<String?>((ref) => null);
+
 class TaskListScreen extends ConsumerWidget {
   const TaskListScreen({super.key});
+
+  String _formatRemainingDays(int days) {
+    final mod10 = days % 10;
+    final mod100 = days % 100;
+    if (mod10 == 1 && mod100 != 11) {
+      return 'осталось $days день';
+    }
+    if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
+      return 'осталось $days дня';
+    }
+    return 'осталось $days дней';
+  }
+
+  String _formatDueLabel(DateTime dueAt, DateFormat dateFormat) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final dueDate = DateTime(dueAt.year, dueAt.month, dueAt.day);
+    final remainingDays = dueDate.difference(today).inDays;
+    final safeDays = remainingDays < 0 ? 0 : remainingDays;
+    return 'Срок: ${dateFormat.format(dueDate)} '
+        '(${_formatRemainingDays(safeDays)})';
+  }
+
+  List<Task> _sortTasks(List<Task> tasks, TaskDeadlineSort sort) {
+    int compareAscending(DateTime? first, DateTime? second) {
+      if (first == null && second == null) {
+        return 0;
+      }
+      if (first == null) {
+        return 1;
+      }
+      if (second == null) {
+        return -1;
+      }
+      return first.compareTo(second);
+    }
+
+    int compareDescending(DateTime? first, DateTime? second) {
+      if (first == null && second == null) {
+        return 0;
+      }
+      if (first == null) {
+        return 1;
+      }
+      if (second == null) {
+        return -1;
+      }
+      return second.compareTo(first);
+    }
+
+    final sorted = List<Task>.from(tasks);
+    sorted.sort((a, b) {
+      final dueCompare = sort == TaskDeadlineSort.ascending
+          ? compareAscending(a.dueAt, b.dueAt)
+          : compareDescending(a.dueAt, b.dueAt);
+      if (dueCompare != 0) {
+        return dueCompare;
+      }
+      return a.createdAt.compareTo(b.createdAt);
+    });
+    return sorted;
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -16,6 +99,28 @@ class TaskListScreen extends ConsumerWidget {
     final visibleTasks =
         tasks.where((task) => task.status != TaskStatus.done).toList();
     final dateFormat = DateFormat('dd.MM.yyyy');
+    final selectedSort = ref.watch(taskSortProvider);
+    final selectedTag = ref.watch(taskTagFilterProvider);
+
+    final tagCounts = <String, int>{};
+    for (final task in visibleTasks) {
+      for (final tag in task.tags) {
+        tagCounts[tag] = (tagCounts[tag] ?? 0) + 1;
+      }
+    }
+    final sortedTags = tagCounts.keys.toList()..sort();
+    if (selectedTag != null && !tagCounts.containsKey(selectedTag)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(taskTagFilterProvider.notifier).state = null;
+      });
+    }
+
+    final filteredTasks = selectedTag == null
+        ? visibleTasks
+        : visibleTasks
+            .where((task) => task.tags.contains(selectedTag))
+            .toList();
+    final sortedTasks = _sortTasks(filteredTasks, selectedSort);
 
     return Scaffold(
       appBar: AppBar(
@@ -34,130 +139,194 @@ class TaskListScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: visibleTasks.isEmpty
-          ? const Center(
-              child: Text('Задач пока нет'),
-            )
-          : ListView.separated(
-              padding: const EdgeInsets.all(16),
-              itemCount: visibleTasks.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 12),
-              itemBuilder: (context, index) {
-                final task = visibleTasks[index];
-                final dueLabel = task.dueAt == null
-                    ? null
-                    : 'Срок: ${dateFormat.format(task.dueAt!)}';
-
-                return Material(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(16),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(16),
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => TaskEditorScreen(task: task),
-                        ),
-                      );
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  task.title,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium
-                                      ?.copyWith(
-                                        decoration: task.status == TaskStatus.done
-                                            ? TextDecoration.lineThrough
-                                            : null,
-                                      ),
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  task.status.label,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .labelLarge
-                                      ?.copyWith(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .primary,
-                                      ),
-                                ),
-                                if (dueLabel != null) ...[
-                                  const SizedBox(height: 4),
-                                  Text(dueLabel),
-                                ],
-                                if (task.tags.isNotEmpty) ...[
-                                  const SizedBox(height: 8),
-                                  Wrap(
-                                    spacing: 6,
-                                    runSpacing: -6,
-                                    children: task.tags
-                                        .map(
-                                          (tag) => Chip(
-                                            label: Text('#$tag'),
-                                            visualDensity: VisualDensity.compact,
-                                          ),
-                                        )
-                                        .toList(),
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Checkbox(
-                            value: task.status == TaskStatus.done,
-                            onChanged: (value) async {
-                              if (value != true) {
-                                return;
-                              }
-                              final shouldComplete = await showDialog<bool>(
-                                context: context,
-                                builder: (dialogContext) => AlertDialog(
-                                  title: const Text('Отметить выполненной'),
-                                  content: const Text(
-                                    'Перенести задачу в архив?',
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.of(dialogContext).pop(false);
-                                      },
-                                      child: const Text('Нет'),
-                                    ),
-                                    FilledButton(
-                                      onPressed: () {
-                                        Navigator.of(dialogContext).pop(true);
-                                      },
-                                      child: const Text('Да'),
-                                    ),
-                                  ],
-                                ),
-                              );
-                              if (shouldComplete == true) {
-                                await ref
-                                    .read(tasksControllerProvider.notifier)
-                                    .toggleDone(task.id);
-                              }
-                            },
-                          ),
-                        ],
-                      ),
+      body: ListView.separated(
+        padding: const EdgeInsets.all(16),
+        itemCount: sortedTasks.isEmpty ? 2 : sortedTasks.length + 1,
+        separatorBuilder: (_, index) {
+          if (index == 0) {
+            return const SizedBox(height: 16);
+          }
+          return const SizedBox(height: 12);
+        },
+        itemBuilder: (context, index) {
+          if (index == 0) {
+            return Row(
+              children: [
+                Expanded(
+                  child: DropdownButtonFormField<TaskDeadlineSort>(
+                    key: const Key('task-sort-dropdown'),
+                    value: selectedSort,
+                    decoration: const InputDecoration(
+                      labelText: 'Сортировка',
                     ),
+                    items: TaskDeadlineSort.values
+                        .map(
+                          (sort) => DropdownMenuItem(
+                            value: sort,
+                            child: Text(sort.label),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) {
+                      if (value == null) {
+                        return;
+                      }
+                      ref.read(taskSortProvider.notifier).state = value;
+                    },
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: DropdownButtonFormField<String?>(
+                    key: const Key('task-tag-dropdown'),
+                    value: selectedTag,
+                    decoration: const InputDecoration(
+                      labelText: 'Теги',
+                    ),
+                    items: [
+                      const DropdownMenuItem(
+                        value: null,
+                        child: Text('Все теги'),
+                      ),
+                      ...sortedTags.map(
+                        (tag) => DropdownMenuItem(
+                          value: tag,
+                          child: Text('$tag (${tagCounts[tag] ?? 0})'),
+                        ),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      ref.read(taskTagFilterProvider.notifier).state = value;
+                    },
+                  ),
+                ),
+              ],
+            );
+          }
+
+          if (sortedTasks.isEmpty) {
+            return const Padding(
+              padding: EdgeInsets.only(top: 24),
+              child: Center(
+                child: Text('Задач пока нет'),
+              ),
+            );
+          }
+
+          final task = sortedTasks[index - 1];
+          final dueLabel = task.dueAt == null
+              ? null
+              : _formatDueLabel(task.dueAt!, dateFormat);
+
+          return Material(
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(16),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => TaskEditorScreen(task: task),
                   ),
                 );
               },
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            task.title,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
+                                  decoration: task.status == TaskStatus.done
+                                      ? TextDecoration.lineThrough
+                                      : null,
+                                ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            task.status.label,
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelLarge
+                                ?.copyWith(
+                                  color:
+                                      Theme.of(context).colorScheme.primary,
+                                ),
+                          ),
+                          if (dueLabel != null) ...[
+                            const SizedBox(height: 4),
+                            Text(dueLabel),
+                          ],
+                          if (task.tags.isNotEmpty) ...[
+                            const SizedBox(height: 8),
+                            Wrap(
+                              spacing: 6,
+                              runSpacing: -6,
+                              children: task.tags
+                                  .map(
+                                    (tag) => Chip(
+                                      label: Text('#$tag'),
+                                      visualDensity: VisualDensity.compact,
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Checkbox(
+                      value: task.status == TaskStatus.done,
+                      onChanged: (value) async {
+                        if (value != true) {
+                          return;
+                        }
+                        final shouldComplete = await showDialog<bool>(
+                          context: context,
+                          builder: (dialogContext) => AlertDialog(
+                            title: const Text('Отметить выполненной'),
+                            content: const Text(
+                              'Перенести задачу в архив?',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(dialogContext).pop(false);
+                                },
+                                child: const Text('Нет'),
+                              ),
+                              FilledButton(
+                                onPressed: () {
+                                  Navigator.of(dialogContext).pop(true);
+                                },
+                                child: const Text('Да'),
+                              ),
+                            ],
+                          ),
+                        );
+                        if (shouldComplete == true) {
+                          await ref
+                              .read(tasksControllerProvider.notifier)
+                              .toggleDone(task.id);
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
             ),
+          );
+        },
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           Navigator.of(context).push(
