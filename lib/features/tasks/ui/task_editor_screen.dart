@@ -23,6 +23,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
   final _descriptionController = TextEditingController();
   final _tagsController = TextEditingController();
   final _attachmentController = TextEditingController();
+  final _tagsFocusNode = FocusNode();
 
   late TaskStatus _status;
   DateTime? _dueAt;
@@ -46,6 +47,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
     _descriptionController.dispose();
     _tagsController.dispose();
     _attachmentController.dispose();
+    _tagsFocusNode.dispose();
     super.dispose();
   }
 
@@ -341,11 +343,116 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                 },
               ),
               const Divider(height: 32),
-              TextField(
-                controller: _tagsController,
-                decoration: const InputDecoration(
-                  labelText: 'Теги (через запятую)',
-                ),
+              RawAutocomplete<String>(
+                textEditingController: _tagsController,
+                focusNode: _tagsFocusNode,
+                optionsBuilder: (value) {
+                  final prefix = _currentTagPrefix(
+                    value.text,
+                    value.selection.baseOffset,
+                  ).toLowerCase();
+                  if (prefix.isEmpty) {
+                    return const Iterable<String>.empty();
+                  }
+                  final usedTags = _parseTags(value.text).toSet();
+                  return knownTags.where(
+                    (tag) =>
+                        tag.toLowerCase().startsWith(prefix) &&
+                        !usedTags.contains(tag.toLowerCase()),
+                  );
+                },
+                onSelected: _insertTagSuggestion,
+                fieldViewBuilder: (
+                  context,
+                  controller,
+                  focusNode,
+                  onFieldSubmitted,
+                ) {
+                  return TextField(
+                    controller: controller,
+                    focusNode: focusNode,
+                    decoration: const InputDecoration(
+                      labelText: 'Теги (через запятую)',
+                    ),
+                  );
+                },
+                optionsViewBuilder: (context, onSelected, options) {
+                  if (options.isEmpty) {
+                    return const SizedBox.shrink();
+                  }
+                  final box = context.findRenderObject() as RenderBox?;
+                  final width = box?.size.width ?? 200;
+                  return Align(
+                    alignment: Alignment.topLeft,
+                    child: Material(
+                      elevation: 4,
+                      borderRadius: BorderRadius.circular(12),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth: width),
+                        child: ListView.separated(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          shrinkWrap: true,
+                          itemCount: options.length,
+                          separatorBuilder: (_, _) =>
+                              const Divider(height: 1),
+                          itemBuilder: (context, index) {
+                            final option = options.elementAt(index);
+                            return ListTile(
+                              title: Text(option),
+                              onTap: () => onSelected(option),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+              ValueListenableBuilder<TextEditingValue>(
+                valueListenable: _tagsController,
+                builder: (context, value, child) {
+                  final prefix = _currentTagPrefix(
+                    value.text,
+                    value.selection.baseOffset,
+                  ).toLowerCase();
+                  if (prefix.isEmpty) {
+                    return const SizedBox.shrink();
+                  }
+                  final usedTags = _parseTags(value.text).toSet();
+                  final suggestions = knownTags
+                      .where(
+                        (tag) =>
+                            tag.toLowerCase().startsWith(prefix) &&
+                            !usedTags.contains(tag.toLowerCase()),
+                      )
+                      .toList();
+                  if (suggestions.isEmpty) {
+                    return const SizedBox.shrink();
+                  }
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Material(
+                      elevation: 2,
+                      borderRadius: BorderRadius.circular(12),
+                      child: ListView.separated(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: suggestions.length,
+                        // ignore: unnecessary_underscores
+                        separatorBuilder: (_, _) => const Divider(height: 1),
+                        itemBuilder: (context, index) {
+                          final tag = suggestions[index];
+                          final count = tagCounts[tag] ?? 0;
+                          return ListTile(
+                            title: Text('$tag ($count)'),
+                            onTap: () => _insertTagSuggestion(tag),
+                          );
+                        },
+                      ),
+                    ),
+                  );
+                },
               ),
               ValueListenableBuilder<TextEditingValue>(
                 valueListenable: _tagsController,
