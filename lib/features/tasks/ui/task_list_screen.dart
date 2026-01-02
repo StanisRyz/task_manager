@@ -6,6 +6,28 @@ import '../data/task.dart';
 import '../state/tasks_controller.dart';
 import 'task_archive_screen.dart';
 import 'task_editor_screen.dart';
+import 'task_filter_screen.dart';
+
+enum TaskDeadlineSort {
+  ascending,
+  descending,
+}
+
+extension TaskDeadlineSortLabel on TaskDeadlineSort {
+  String get label {
+    switch (this) {
+      case TaskDeadlineSort.ascending:
+        return 'По возрастанию срока';
+      case TaskDeadlineSort.descending:
+        return 'По убыванию срока';
+    }
+  }
+}
+
+final taskSortProvider =
+    StateProvider<TaskDeadlineSort>((ref) => TaskDeadlineSort.ascending);
+
+final taskTagFilterProvider = StateProvider<String?>((ref) => null);
 
 enum TaskDeadlineSort {
   ascending,
@@ -122,10 +144,43 @@ class TaskListScreen extends ConsumerWidget {
             .toList();
     final sortedTasks = _sortTasks(filteredTasks, selectedSort);
 
+    Future<void> openFilterScreen() async {
+      final result = await Navigator.of(context).push<String?>(
+        MaterialPageRoute(
+          builder: (_) => TaskFilterScreen(
+            initialTag: selectedTag,
+          ),
+        ),
+      );
+      if (result != null || selectedTag != null) {
+        ref.read(taskTagFilterProvider.notifier).state = result;
+      }
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Задачи'),
         actions: [
+          IconButton(
+            tooltip: 'Фильтры',
+            icon: const Icon(Icons.filter_alt_outlined),
+            onPressed: openFilterScreen,
+          ),
+          PopupMenuButton<TaskDeadlineSort>(
+            tooltip: 'Сортировка',
+            icon: const Icon(Icons.swap_vert),
+            onSelected: (value) {
+              ref.read(taskSortProvider.notifier).state = value;
+            },
+            itemBuilder: (context) => TaskDeadlineSort.values
+                .map(
+                  (sort) => PopupMenuItem(
+                    value: sort,
+                    child: Text(sort.label),
+                  ),
+                )
+                .toList(),
+          ),
           IconButton(
             tooltip: 'Архив',
             icon: const Icon(Icons.archive_outlined),
@@ -139,86 +194,21 @@ class TaskListScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: ListView.separated(
-        padding: const EdgeInsets.all(16),
-        itemCount: sortedTasks.isEmpty ? 2 : sortedTasks.length + 1,
-        separatorBuilder: (_, index) {
-          if (index == 0) {
-            return const SizedBox(height: 16);
-          }
-          return const SizedBox(height: 12);
-        },
-        itemBuilder: (context, index) {
-          if (index == 0) {
-            return Row(
-              children: [
-                Expanded(
-                  child: DropdownButtonFormField<TaskDeadlineSort>(
-                    key: const Key('task-sort-dropdown'),
-                    initialValue: selectedSort,
-                    decoration: const InputDecoration(
-                      labelText: 'Сортировка',
-                    ),
-                    items: TaskDeadlineSort.values
-                        .map(
-                          (sort) => DropdownMenuItem(
-                            value: sort,
-                            child: Text(sort.label),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (value) {
-                      if (value == null) {
-                        return;
-                      }
-                      ref.read(taskSortProvider.notifier).state = value;
-                    },
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: DropdownButtonFormField<String?>(
-                    key: const Key('task-tag-dropdown'),
-                    initialValue: selectedTag,
-                    decoration: const InputDecoration(
-                      labelText: 'Теги',
-                    ),
-                    items: [
-                      const DropdownMenuItem(
-                        value: null,
-                        child: Text('Все теги'),
-                      ),
-                      ...sortedTags.map(
-                        (tag) => DropdownMenuItem(
-                          value: tag,
-                          child: Text('$tag (${tagCounts[tag] ?? 0})'),
-                        ),
-                      ),
-                    ],
-                    onChanged: (value) {
-                      ref.read(taskTagFilterProvider.notifier).state = value;
-                    },
-                  ),
-                ),
-              ],
-            );
-          }
-
-          if (sortedTasks.isEmpty) {
-            return const Padding(
-              padding: EdgeInsets.only(top: 24),
-              child: Center(
-                child: Text('Задач пока нет'),
-              ),
-            );
-          }
-
-          final task = sortedTasks[index - 1];
+      body: sortedTasks.isEmpty
+          ? const Center(
+              child: Text('Задач пока нет'),
+            )
+          : ListView.separated(
+              padding: const EdgeInsets.all(16),
+              itemCount: sortedTasks.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                final task = sortedTasks[index];
           final dueLabel = task.dueAt == null
               ? null
               : _formatDueLabel(task.dueAt!, dateFormat);
 
-          return Material(
+                return Material(
             color: Theme.of(context).colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(16),
             child: InkWell(
@@ -323,6 +313,9 @@ class TaskListScreen extends ConsumerWidget {
                   ],
                 ),
               ),
+            ),
+                );
+              },
             ),
           );
         },

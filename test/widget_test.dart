@@ -101,7 +101,7 @@ void main() {
     expect(secondPosition < firstPosition, isTrue);
     expect(firstPosition < thirdPosition, isTrue);
 
-    await tester.tap(find.byKey(const Key('task-sort-dropdown')));
+    await tester.tap(find.byIcon(Icons.swap_vert));
     await tester.pumpAndSettle();
     await tester.tap(find.text('По убыванию срока').last);
     await tester.pumpAndSettle();
@@ -112,18 +112,20 @@ void main() {
     expect(thirdPositionDesc < firstPositionDesc, isTrue);
     expect(firstPositionDesc < secondPositionDesc, isTrue);
 
-    await tester.tap(find.byKey(const Key('task-tag-dropdown')));
+    await tester.tap(find.byIcon(Icons.filter_alt_outlined));
     await tester.pumpAndSettle();
     await tester.tap(find.text('работа (2)').last);
+    await tester.tap(find.text('Применить'));
     await tester.pumpAndSettle();
 
     expect(find.text('Первая'), findsOneWidget);
     expect(find.text('Третья'), findsOneWidget);
     expect(find.text('Вторая'), findsNothing);
 
-    await tester.tap(find.byKey(const Key('task-tag-dropdown')));
+    await tester.tap(find.byIcon(Icons.filter_alt_outlined));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Все теги').last);
+    await tester.tap(find.text('Применить'));
     await tester.pumpAndSettle();
 
     expect(find.text('Вторая'), findsOneWidget);
