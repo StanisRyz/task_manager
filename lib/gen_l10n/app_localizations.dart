@@ -398,12 +398,6 @@ abstract class AppLocalizations {
   /// **'Вложения'**
   String get attachmentsTitle;
 
-  /// No description provided for @attachmentLabel.
-  ///
-  /// In ru, this message translates to:
-  /// **'Добавить вложение (строка)'**
-  String get attachmentLabel;
-
   /// No description provided for @attachmentTypeLabel.
   ///
   /// In ru, this message translates to:
@@ -433,12 +427,6 @@ abstract class AppLocalizations {
   /// In ru, this message translates to:
   /// **'Добавить файл'**
   String get addAttachmentFile;
-
-  /// No description provided for @add.
-  ///
-  /// In ru, this message translates to:
-  /// **'Добавить'**
-  String get add;
 
   /// No description provided for @noAttachments.
   ///

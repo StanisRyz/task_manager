@@ -173,9 +173,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get attachmentsTitle => 'Вложения';
 
   @override
-  String get attachmentLabel => 'Добавить вложение (строка)';
-
-  @override
   String get attachmentTypeLabel => 'Тип вложения';
 
   @override
@@ -189,9 +186,6 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get addAttachmentFile => 'Добавить файл';
-
-  @override
-  String get add => 'Добавить';
 
   @override
   String get noAttachments => 'Вложений нет';

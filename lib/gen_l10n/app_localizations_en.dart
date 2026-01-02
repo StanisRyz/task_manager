@@ -171,9 +171,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get attachmentsTitle => 'Attachments';
 
   @override
-  String get attachmentLabel => 'Add attachment (text)';
-
-  @override
   String get attachmentTypeLabel => 'Attachment type';
 
   @override
@@ -187,9 +184,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get addAttachmentFile => 'Add file';
-
-  @override
-  String get add => 'Add';
 
   @override
   String get noAttachments => 'No attachments';
