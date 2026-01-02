@@ -24,14 +24,62 @@ void main() {
     box = await Hive.openBox<Task>('tasks_test');
   });
 
+  setUp(() async {
+    await box.clear();
+  });
+
   tearDownAll(() async {
     await box.close();
     await tempDir.delete(recursive: true);
   });
 
-  testWidgets('Task list screen renders title and FAB',
+  testWidgets('Task list screen sorts and filters by tag',
       (WidgetTester tester) async {
     final repository = TasksRepository(box);
+    final now = DateTime.now();
+
+    await repository.upsert(
+      Task(
+        id: '1',
+        title: 'Первая',
+        description: 'Описание 1',
+        dueAt: DateTime(now.year, now.month, now.day + 3),
+        status: TaskStatus.planned,
+        tags: const ['работа'],
+        attachments: const [],
+        createdAt: now,
+        updatedAt: now,
+        completedAt: null,
+      ),
+    );
+    await repository.upsert(
+      Task(
+        id: '2',
+        title: 'Вторая',
+        description: 'Описание 2',
+        dueAt: DateTime(now.year, now.month, now.day + 1),
+        status: TaskStatus.planned,
+        tags: const ['дом'],
+        attachments: const [],
+        createdAt: now.add(const Duration(minutes: 1)),
+        updatedAt: now.add(const Duration(minutes: 1)),
+        completedAt: null,
+      ),
+    );
+    await repository.upsert(
+      Task(
+        id: '3',
+        title: 'Третья',
+        description: 'Описание 3',
+        dueAt: DateTime(now.year, now.month, now.day + 5),
+        status: TaskStatus.planned,
+        tags: const ['работа'],
+        attachments: const [],
+        createdAt: now.add(const Duration(minutes: 2)),
+        updatedAt: now.add(const Duration(minutes: 2)),
+        completedAt: null,
+      ),
+    );
 
     await tester.pumpWidget(
       ProviderScope(
@@ -46,5 +94,40 @@ void main() {
 
     expect(find.text('Задачи'), findsOneWidget);
     expect(find.byType(FloatingActionButton), findsOneWidget);
+
+    final secondPosition = tester.getTopLeft(find.text('Вторая')).dy;
+    final firstPosition = tester.getTopLeft(find.text('Первая')).dy;
+    final thirdPosition = tester.getTopLeft(find.text('Третья')).dy;
+    expect(secondPosition < firstPosition, isTrue);
+    expect(firstPosition < thirdPosition, isTrue);
+
+    await tester.tap(find.byKey(const Key('sort-menu-button')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('По убыванию срока').last);
+    await tester.pumpAndSettle();
+
+    final secondPositionDesc = tester.getTopLeft(find.text('Вторая')).dy;
+    final firstPositionDesc = tester.getTopLeft(find.text('Первая')).dy;
+    final thirdPositionDesc = tester.getTopLeft(find.text('Третья')).dy;
+    expect(thirdPositionDesc < firstPositionDesc, isTrue);
+    expect(firstPositionDesc < secondPositionDesc, isTrue);
+
+    await tester.tap(find.byKey(const Key('open-filter-button')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('работа (2)').last);
+    await tester.tap(find.text('Применить'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Первая'), findsOneWidget);
+    expect(find.text('Третья'), findsOneWidget);
+    expect(find.text('Вторая'), findsNothing);
+
+    await tester.tap(find.byKey(const Key('open-filter-button')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Все теги').last);
+    await tester.tap(find.text('Применить'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Вторая'), findsOneWidget);
   });
 }
