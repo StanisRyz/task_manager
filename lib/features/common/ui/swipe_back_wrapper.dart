@@ -24,7 +24,8 @@ class _SwipeBackWrapperState extends State<SwipeBackWrapper> {
   bool _isInteractiveInput(Offset globalPosition) {
     final result = HitTestResult();
     final view = View.of(context);
-    WidgetsBinding.instance.hitTestInView(result, globalPosition, view);
+    WidgetsBinding.instance
+        .hitTestInView(result, globalPosition, view.viewId);
     for (final entry in result.path) {
       final target = entry.target;
       if (target is RenderEditable) {
