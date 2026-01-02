@@ -36,9 +36,9 @@ class TaskArchiveScreen extends ConsumerWidget {
               separatorBuilder: (_, _) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
                 final task = archived[index];
-                final archivedLabel = task.archivedAt == null
+                final archivedLabel = task.completedAt == null
                     ? null
-                    : 'Архив: ${dateFormat.format(task.archivedAt!)}';
+                    : 'Архив: ${dateFormat.format(task.completedAt!)}';
 
                 return Material(
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
