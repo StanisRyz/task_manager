@@ -124,6 +124,58 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
     return parts;
   }
 
+  Map<String, int> _collectTagCounts(List<Task> tasks) {
+    final counts = <String, int>{};
+    for (final task in tasks) {
+      for (final tag in task.tags) {
+        counts[tag] = (counts[tag] ?? 0) + 1;
+      }
+    }
+    return counts;
+  }
+
+  String _currentTagPrefix(String text, int cursor) {
+    final safeCursor = cursor.clamp(0, text.length);
+    final lastComma = text.lastIndexOf(',', safeCursor - 1);
+    final start = lastComma == -1 ? 0 : lastComma + 1;
+    return text.substring(start, safeCursor).trim();
+  }
+
+  void _insertTagSuggestion(String suggestion) {
+    final text = _tagsController.text;
+    final selection = _tagsController.selection;
+    final cursor =
+        selection.baseOffset == -1 ? text.length : selection.baseOffset;
+    final safeCursor = cursor.clamp(0, text.length);
+    final lastComma = text.lastIndexOf(',', safeCursor - 1);
+    final start = lastComma == -1 ? 0 : lastComma + 1;
+    final nextComma = text.indexOf(',', safeCursor);
+    final end = nextComma == -1 ? text.length : nextComma;
+
+    var before = text.substring(0, start);
+    var after = text.substring(end);
+
+    if (before.isNotEmpty) {
+      before = before.replaceAll(RegExp(r'\s+$'), '');
+      if (!before.endsWith(',')) {
+        before = '$before,';
+      }
+      before = '$before ';
+    }
+
+    if (after.isNotEmpty) {
+      after = after.replaceFirst(RegExp(r'^\s+'), '');
+    }
+
+    final nextText = '$before$suggestion$after';
+    final nextCursor =
+        (before.length + suggestion.length).clamp(0, nextText.length);
+    _tagsController.value = TextEditingValue(
+      text: nextText,
+      selection: TextSelection.collapsed(offset: nextCursor),
+    );
+  }
+
   Future<void> _save() async {
     if (!(_formKey.currentState?.validate() ?? false)) {
       return;
@@ -155,6 +207,9 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final tasks = ref.watch(tasksControllerProvider);
+    final tagCounts = _collectTagCounts(tasks);
+    final knownTags = tagCounts.keys.toList()..sort();
     final dateFormat = DateFormat('dd.MM.yyyy');
     final dueLabel = _dueAt == null
         ? 'Не задан'
@@ -288,6 +343,51 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                 decoration: const InputDecoration(
                   labelText: 'Теги (через запятую)',
                 ),
+              ),
+              ValueListenableBuilder<TextEditingValue>(
+                valueListenable: _tagsController,
+                builder: (context, value, child) {
+                  final prefix = _currentTagPrefix(
+                    value.text,
+                    value.selection.baseOffset,
+                  ).toLowerCase();
+                  if (prefix.isEmpty) {
+                    return const SizedBox.shrink();
+                  }
+                  final usedTags = _parseTags(value.text).toSet();
+                  final suggestions = knownTags
+                      .where(
+                        (tag) =>
+                            tag.toLowerCase().startsWith(prefix) &&
+                            !usedTags.contains(tag.toLowerCase()),
+                      )
+                      .toList();
+                  if (suggestions.isEmpty) {
+                    return const SizedBox.shrink();
+                  }
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Material(
+                      elevation: 2,
+                      borderRadius: BorderRadius.circular(12),
+                      child: ListView.separated(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: suggestions.length,
+                        separatorBuilder: (_, __) => const Divider(height: 1),
+                        itemBuilder: (context, index) {
+                          final tag = suggestions[index];
+                          final count = tagCounts[tag] ?? 0;
+                          return ListTile(
+                            title: Text('$tag ($count)'),
+                            onTap: () => _insertTagSuggestion(tag),
+                          );
+                        },
+                      ),
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 16),
               Text(
