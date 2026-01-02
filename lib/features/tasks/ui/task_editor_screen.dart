@@ -23,6 +23,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
   final _descriptionController = TextEditingController();
   final _tagsController = TextEditingController();
   final _attachmentController = TextEditingController();
+  final _tagsFocusNode = FocusNode();
 
   late TaskStatus _status;
   DateTime? _dueAt;
@@ -46,6 +47,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
     _descriptionController.dispose();
     _tagsController.dispose();
     _attachmentController.dispose();
+    _tagsFocusNode.dispose();
     super.dispose();
   }
 
