@@ -36,14 +36,20 @@ final taskTagFilterProvider = StateProvider<String?>((ref) => null);
 class TaskListScreen extends ConsumerWidget {
   const TaskListScreen({super.key});
 
-  String _formatRemainingDays(AppLocalizations l10n, int days) {
-    return l10n.remainingDays(days);
+  String _formatRemainingDays(
+    AppLocalizations l10n,
+    int days,
+    NumberFormat numberFormat,
+  ) {
+    final formatted = numberFormat.format(days);
+    return l10n.remainingDays(days).replaceAll('#', formatted);
   }
 
   String _formatDueLabel(
     AppLocalizations l10n,
     DateTime dueAt,
     DateFormat dateFormat,
+    NumberFormat numberFormat,
   ) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -52,7 +58,7 @@ class TaskListScreen extends ConsumerWidget {
     final safeDays = remainingDays < 0 ? 0 : remainingDays;
     return l10n.dueLabel(
       dateFormat.format(dueDate),
-      _formatRemainingDays(l10n, safeDays),
+      _formatRemainingDays(l10n, safeDays, numberFormat),
     );
   }
 
@@ -109,6 +115,7 @@ class TaskListScreen extends ConsumerWidget {
         tasks.where((task) => task.status != TaskStatus.done).toList();
     final localeTag = Localizations.localeOf(context).toLanguageTag();
     final dateFormat = DateFormat('dd.MM.yyyy', localeTag);
+    final numberFormat = NumberFormat.decimalPattern(localeTag);
     final selectedSort = ref.watch(taskSortProvider);
     final selectedTag = ref.watch(taskTagFilterProvider);
 
@@ -206,7 +213,12 @@ class TaskListScreen extends ConsumerWidget {
                 final task = sortedTasks[index];
                 final dueLabel = task.dueAt == null
                     ? null
-                    : _formatDueLabel(l10n, task.dueAt!, dateFormat);
+                    : _formatDueLabel(
+                        l10n,
+                        task.dueAt!,
+                        dateFormat,
+                        numberFormat,
+                      );
 
                 return Material(
                   color: cardColor,

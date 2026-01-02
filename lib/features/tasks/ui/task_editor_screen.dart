@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../common/ui/swipe_back_wrapper.dart';
 import '../../../l10n/app_localizations_ext.dart';
+import '../data/attachment_storage.dart';
 import '../data/task.dart';
 import '../state/tasks_controller.dart';
 import 'task_status_label.dart';
@@ -153,11 +154,11 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
       return;
     }
     final selected = result.files.single;
-    final value = selected.path ?? selected.name;
-    if (value.isEmpty) {
+    final storedPath = await storeAttachmentFile(selected);
+    if (storedPath == null || storedPath.isEmpty) {
       return;
     }
-    _addAttachmentValue(value);
+    _addAttachmentValue(storedPath);
   }
 
   List<String> _parseTags(String raw) {
