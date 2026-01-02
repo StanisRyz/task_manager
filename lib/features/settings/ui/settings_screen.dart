@@ -40,6 +40,9 @@ class SettingsScreen extends ConsumerWidget {
           RadioGroup<Locale>(
             groupValue: locale,
             onChanged: (value) {
+              if (value == null) {
+                return;
+              }
               ref.read(localeProvider.notifier).setLocale(value);
             },
             child: Column(
