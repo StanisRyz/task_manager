@@ -11,8 +11,7 @@ class TaskArchiveScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final TasksState tasksState = ref.watch(tasksControllerProvider);
-    final List<Task> archived = tasksState.archived;
+    final archived = ref.watch(tasksControllerProvider).archived;
     final dateFormat = DateFormat('dd.MM.yyyy');
 
     return Scaffold(

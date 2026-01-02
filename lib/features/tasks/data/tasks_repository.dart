@@ -10,7 +10,7 @@ class TasksRepository {
 
   List<Task> getAll() {
     try {
-      final tasks = _box.values.where((task) => task.archivedAt == null).toList();
+      final tasks = _box.values.toList();
       tasks.sort((a, b) {
         final aDone = a.status == TaskStatus.done;
         final bDone = b.status == TaskStatus.done;
@@ -28,23 +28,6 @@ class TasksRepository {
       return tasks;
     } catch (error, stackTrace) {
       debugPrint('Не удалось загрузить задачи: $error');
-      debugPrintStack(stackTrace: stackTrace);
-      return [];
-    }
-  }
-
-  List<Task> getArchived() {
-    try {
-      final tasks =
-          _box.values.where((task) => task.archivedAt != null).toList();
-      tasks.sort((a, b) {
-        final aArchived = a.archivedAt ?? DateTime(1970);
-        final bArchived = b.archivedAt ?? DateTime(1970);
-        return bArchived.compareTo(aArchived);
-      });
-      return tasks;
-    } catch (error, stackTrace) {
-      debugPrint('Не удалось загрузить архив: $error');
       debugPrintStack(stackTrace: stackTrace);
       return [];
     }
@@ -84,26 +67,6 @@ class TasksRepository {
       await _box.put(id, updatedTask);
     } catch (error, stackTrace) {
       debugPrint('Не удалось обновить статус: $error');
-      debugPrintStack(stackTrace: stackTrace);
-    }
-  }
-
-  Future<void> archiveTask(String id) async {
-    try {
-      final task = _box.get(id);
-      if (task == null) {
-        return;
-      }
-      final now = DateTime.now();
-      final updatedTask = task.copyWith(
-        status: TaskStatus.done,
-        completedAt: task.completedAt ?? now,
-        archivedAt: now,
-        updatedAt: now,
-      );
-      await _box.put(id, updatedTask);
-    } catch (error, stackTrace) {
-      debugPrint('Не удалось архивировать задачу: $error');
       debugPrintStack(stackTrace: stackTrace);
     }
   }

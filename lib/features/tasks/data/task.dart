@@ -31,7 +31,6 @@ class Task {
     required this.createdAt,
     required this.updatedAt,
     required this.completedAt,
-    required this.archivedAt,
   });
 
   final String id;
@@ -44,7 +43,6 @@ class Task {
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? completedAt;
-  final DateTime? archivedAt;
 
   Task copyWith({
     String? id,
@@ -57,7 +55,6 @@ class Task {
     DateTime? createdAt,
     DateTime? updatedAt,
     DateTime? completedAt,
-    DateTime? archivedAt,
   }) {
     return Task(
       id: id ?? this.id,
@@ -70,7 +67,6 @@ class Task {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       completedAt: completedAt ?? this.completedAt,
-      archivedAt: archivedAt ?? this.archivedAt,
     );
   }
 }
@@ -113,14 +109,13 @@ class TaskAdapter extends TypeAdapter<Task> {
       createdAt: fields[7] as DateTime,
       updatedAt: fields[8] as DateTime,
       completedAt: fields[9] as DateTime?,
-      archivedAt: fields[10] as DateTime?,
     );
   }
 
   @override
   void write(BinaryWriter writer, Task obj) {
     writer
-      ..writeByte(11)
+      ..writeByte(10)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -140,8 +135,6 @@ class TaskAdapter extends TypeAdapter<Task> {
       ..writeByte(8)
       ..write(obj.updatedAt)
       ..writeByte(9)
-      ..write(obj.completedAt)
-      ..writeByte(10)
-      ..write(obj.archivedAt);
+      ..write(obj.completedAt);
   }
 }
