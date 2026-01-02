@@ -46,43 +46,39 @@ class _TaskFilterScreenState extends ConsumerState<TaskFilterScreen> {
         child: Column(
           children: [
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  Text(
-                    'Теги',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 12),
-                  RadioListTile<String?>(
-                    value: null,
-                    groupValue: _selectedTag,
-                    title: const Text('Все теги'),
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedTag = value;
-                      });
-                    },
-                  ),
-                  if (sortedTags.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 12),
-                      child: Text('Теги пока не добавлены'),
-                    )
-                  else
-                    ...sortedTags.map(
-                      (tag) => RadioListTile<String?>(
-                        value: tag,
-                        groupValue: _selectedTag,
-                        title: Text('$tag (${tagCounts[tag] ?? 0})'),
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedTag = value;
-                          });
-                        },
-                      ),
+              child: RadioGroup<String?>(
+                groupValue: _selectedTag,
+                onChanged: (value) {
+                  setState(() {
+                    _selectedTag = value;
+                  });
+                },
+                child: ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    Text(
+                      'Теги',
+                      style: Theme.of(context).textTheme.titleMedium,
                     ),
-                ],
+                    const SizedBox(height: 12),
+                    const RadioListTile<String?>(
+                      value: null,
+                      title: Text('Все теги'),
+                    ),
+                    if (sortedTags.isEmpty)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        child: Text('Теги пока не добавлены'),
+                      )
+                    else
+                      ...sortedTags.map(
+                        (tag) => RadioListTile<String?>(
+                          value: tag,
+                          title: Text('$tag (${tagCounts[tag] ?? 0})'),
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
             Padding(
