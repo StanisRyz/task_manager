@@ -312,12 +312,9 @@ class TaskListScreen extends ConsumerWidget {
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Checkbox(
-                                value: task.status == TaskStatus.done,
-                                onChanged: (value) async {
-                                  if (value != true) {
-                                    return;
-                                  }
+                              IconButton(
+                                icon: const Icon(Icons.check),
+                                onPressed: () async {
                                   final shouldComplete =
                                       await showDialog<bool>(
                                     context: context,
