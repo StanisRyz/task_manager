@@ -67,6 +67,11 @@
   "tagsLabel": "Теги (через запятую)",
   "attachmentsTitle": "Вложения",
   "attachmentLabel": "Добавить вложение (строка)",
+  "attachmentTypeLabel": "Тип вложения",
+  "attachmentTypePhoto": "Фото",
+  "attachmentTypeVideo": "Видео",
+  "attachmentTypeDocument": "Документ",
+  "addAttachmentFile": "Добавить файл",
   "add": "Добавить",
   "noAttachments": "Вложений нет",
   "save": "Сохранить"
