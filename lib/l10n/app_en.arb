@@ -66,13 +66,11 @@
   "pickDate": "Pick date",
   "tagsLabel": "Tags (comma-separated)",
   "attachmentsTitle": "Attachments",
-  "attachmentLabel": "Add attachment (text)",
   "attachmentTypeLabel": "Attachment type",
   "attachmentTypePhoto": "Photo",
   "attachmentTypeVideo": "Video",
   "attachmentTypeDocument": "Document",
   "addAttachmentFile": "Add file",
-  "add": "Add",
   "noAttachments": "No attachments",
   "save": "Save"
 }

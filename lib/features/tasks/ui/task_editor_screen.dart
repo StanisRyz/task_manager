@@ -48,7 +48,6 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _tagsController = TextEditingController();
-  final _attachmentController = TextEditingController();
   final _tagsFocusNode = FocusNode();
   final _singleLineFormatter =
       FilteringTextInputFormatter.allow(_singleLineAllowedCharacters);
@@ -77,7 +76,6 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
     _titleController.dispose();
     _descriptionController.dispose();
     _tagsController.dispose();
-    _attachmentController.dispose();
     _tagsFocusNode.dispose();
     super.dispose();
   }
@@ -139,15 +137,6 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
       _attachments.add(value);
     });
     return true;
-  }
-
-  void _addAttachment() {
-    final value = _attachmentController.text.trim();
-    if (value.isEmpty) {
-      return;
-    }
-    _addAttachmentValue(value);
-    _attachmentController.clear();
   }
 
   Future<void> _pickAttachment(AttachmentType type) async {
@@ -477,7 +466,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                   children: [
                     Expanded(
                       child: DropdownButtonFormField<AttachmentType>(
-                        initialValue: _attachmentType,
+                        value: _attachmentType,
                         decoration: InputDecoration(
                           labelText: l10n.attachmentTypeLabel,
                         ),
@@ -513,27 +502,6 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                       onPressed: () => _pickAttachment(_attachmentType),
                       icon: const Icon(Icons.attach_file),
                       label: Text(l10n.addAttachmentFile),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _attachmentController,
-                        decoration: InputDecoration(
-                          labelText: l10n.attachmentLabel,
-                        ),
-                        inputFormatters: [
-                          _singleLineFormatter,
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    FilledButton(
-                      onPressed: _addAttachment,
-                      child: Text(l10n.add),
                     ),
                   ],
                 ),
