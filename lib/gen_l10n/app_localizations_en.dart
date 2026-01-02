@@ -129,10 +129,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get titleRequired => 'Enter a task title';
 
   @override
+  String get shortDescriptionLabel => 'Short description';
+
+  @override
   String get descriptionLabel => 'Description';
 
   @override
   String get descriptionRequired => 'Enter a task description';
+
+  @override
+  String get descriptionOrShortRequired => 'Enter a short description or description';
 
   @override
   String get statusLabel => 'Status';
@@ -156,7 +162,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dueDateTitle => 'Due date';
 
   @override
-  String get dueDateNotSet => 'Not set';
+  String get dueDateNotSet => 'No due date';
 
   @override
   String get clearDate => 'Clear date';

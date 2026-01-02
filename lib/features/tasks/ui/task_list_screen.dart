@@ -212,7 +212,7 @@ class TaskListScreen extends ConsumerWidget {
               itemBuilder: (context, index) {
                 final task = sortedTasks[index];
                 final dueLabel = task.dueAt == null
-                    ? null
+                    ? l10n.dueDateNotSet
                     : _formatDueLabel(
                         l10n,
                         task.dueAt!,
@@ -265,10 +265,8 @@ class TaskListScreen extends ConsumerWidget {
                                             .primary,
                                       ),
                                 ),
-                                if (dueLabel != null) ...[
-                                  const SizedBox(height: 4),
-                                  Text(dueLabel),
-                                ],
+                                const SizedBox(height: 4),
+                                Text(dueLabel),
                                 if (task.tags.isNotEmpty) ...[
                                   const SizedBox(height: 8),
                                   Wrap(

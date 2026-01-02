@@ -131,10 +131,16 @@ class AppLocalizationsRu extends AppLocalizations {
   String get titleRequired => 'Введите название задачи';
 
   @override
+  String get shortDescriptionLabel => 'Краткое описание';
+
+  @override
   String get descriptionLabel => 'Описание';
 
   @override
   String get descriptionRequired => 'Введите описание задачи';
+
+  @override
+  String get descriptionOrShortRequired => 'Введите краткое описание или описание';
 
   @override
   String get statusLabel => 'Статус';
@@ -158,7 +164,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get dueDateTitle => 'Срок';
 
   @override
-  String get dueDateNotSet => 'Не задан';
+  String get dueDateNotSet => 'Срок не установлен';
 
   @override
   String get clearDate => 'Очистить дату';

@@ -10,6 +10,7 @@ class Task {
   Task({
     required this.id,
     required this.title,
+    required this.shortDescription,
     required this.description,
     required this.dueAt,
     required this.status,
@@ -22,6 +23,7 @@ class Task {
 
   final String id;
   final String title;
+  final String? shortDescription;
   final String? description;
   final DateTime? dueAt;
   final TaskStatus status;
@@ -34,6 +36,7 @@ class Task {
   Task copyWith({
     String? id,
     String? title,
+    String? shortDescription,
     String? description,
     DateTime? dueAt,
     TaskStatus? status,
@@ -46,6 +49,7 @@ class Task {
     return Task(
       id: id ?? this.id,
       title: title ?? this.title,
+      shortDescription: shortDescription ?? this.shortDescription,
       description: description ?? this.description,
       dueAt: dueAt ?? this.dueAt,
       status: status ?? this.status,
@@ -88,6 +92,7 @@ class TaskAdapter extends TypeAdapter<Task> {
     return Task(
       id: fields[0] as String,
       title: fields[1] as String,
+      shortDescription: fields[10] as String?,
       description: fields[2] as String?,
       dueAt: fields[3] as DateTime?,
       status: fields[4] as TaskStatus,
@@ -102,7 +107,7 @@ class TaskAdapter extends TypeAdapter<Task> {
   @override
   void write(BinaryWriter writer, Task obj) {
     writer
-      ..writeByte(10)
+      ..writeByte(11)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -122,6 +127,8 @@ class TaskAdapter extends TypeAdapter<Task> {
       ..writeByte(8)
       ..write(obj.updatedAt)
       ..writeByte(9)
-      ..write(obj.completedAt);
+      ..write(obj.completedAt)
+      ..writeByte(10)
+      ..write(obj.shortDescription);
   }
 }
