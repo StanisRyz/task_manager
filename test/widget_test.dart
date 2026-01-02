@@ -115,7 +115,7 @@ void main() {
     await tester.tap(find.byKey(const Key('open-filter-button')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('работа (2)').last);
-    await tester.tap(find.text('Применить'));
+    await tester.tap(find.byKey(const Key('task-filter-apply')));
     await tester.pumpAndSettle();
 
     expect(find.text('Первая'), findsOneWidget);
@@ -125,7 +125,7 @@ void main() {
     await tester.tap(find.byKey(const Key('open-filter-button')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Все теги').last);
-    await tester.tap(find.text('Применить'));
+    await tester.tap(find.byKey(const Key('task-filter-apply')));
     await tester.pumpAndSettle();
 
     expect(find.text('Вторая'), findsOneWidget);

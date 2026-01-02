@@ -85,10 +85,11 @@ class _TaskFilterScreenState extends ConsumerState<TaskFilterScreen> {
               padding: const EdgeInsets.all(16),
               child: SizedBox(
                 width: double.infinity,
-                child: FilledButton(
-                  onPressed: () {
-                    Navigator.of(context).pop(_selectedTag);
-                  },
+              child: FilledButton(
+                key: const Key('task-filter-apply'),
+                onPressed: () {
+                  Navigator.of(context).pop(_selectedTag);
+                },
                   child: const Text('Применить'),
                 ),
               ),
