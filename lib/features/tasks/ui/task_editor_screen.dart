@@ -466,7 +466,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                   children: [
                     Expanded(
                       child: DropdownButtonFormField<AttachmentType>(
-                        value: _attachmentType,
+                        initialValue: _attachmentType,
                         decoration: InputDecoration(
                           labelText: l10n.attachmentTypeLabel,
                         ),
