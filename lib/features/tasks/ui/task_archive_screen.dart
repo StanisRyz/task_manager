@@ -25,7 +25,7 @@ class TaskArchiveScreen extends ConsumerWidget {
           : ListView.separated(
               padding: const EdgeInsets.all(16),
               itemCount: archived.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              separatorBuilder: (_, _) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
                 final task = archived[index];
                 final archivedLabel = task.archivedAt == null
@@ -97,4 +97,9 @@ class TaskArchiveScreen extends ConsumerWidget {
             ),
     );
   }
+}
+
+extension on List<Task> {
+   // ignore: strict_top_level_inference
+   get archived => null;
 }
