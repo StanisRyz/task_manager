@@ -314,6 +314,12 @@ abstract class AppLocalizations {
   /// **'Введите название задачи'**
   String get titleRequired;
 
+  /// No description provided for @shortDescriptionLabel.
+  ///
+  /// In ru, this message translates to:
+  /// **'Краткое описание'**
+  String get shortDescriptionLabel;
+
   /// No description provided for @descriptionLabel.
   ///
   /// In ru, this message translates to:
@@ -325,6 +331,12 @@ abstract class AppLocalizations {
   /// In ru, this message translates to:
   /// **'Введите описание задачи'**
   String get descriptionRequired;
+
+  /// No description provided for @descriptionOrShortRequired.
+  ///
+  /// In ru, this message translates to:
+  /// **'Введите краткое описание или описание'**
+  String get descriptionOrShortRequired;
 
   /// No description provided for @statusLabel.
   ///
@@ -371,7 +383,7 @@ abstract class AppLocalizations {
   /// No description provided for @dueDateNotSet.
   ///
   /// In ru, this message translates to:
-  /// **'Не задан'**
+  /// **'Срок не установлен'**
   String get dueDateNotSet;
 
   /// No description provided for @clearDate.

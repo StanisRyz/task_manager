@@ -47,6 +47,7 @@ void main() {
       Task(
         id: '1',
         title: 'Первая',
+        shortDescription: null,
         description: 'Описание 1',
         dueAt: DateTime(now.year, now.month, now.day + 3),
         status: TaskStatus.planned,
@@ -61,6 +62,7 @@ void main() {
       Task(
         id: '2',
         title: 'Вторая',
+        shortDescription: null,
         description: 'Описание 2',
         dueAt: DateTime(now.year, now.month, now.day + 1),
         status: TaskStatus.planned,
@@ -75,6 +77,7 @@ void main() {
       Task(
         id: '3',
         title: 'Третья',
+        shortDescription: null,
         description: 'Описание 3',
         dueAt: DateTime(now.year, now.month, now.day + 5),
         status: TaskStatus.planned,

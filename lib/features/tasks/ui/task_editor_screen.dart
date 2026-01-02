@@ -47,6 +47,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
   final _formKey = GlobalKey<FormState>();
   final _dueDateFieldKey = GlobalKey<FormFieldState<DateTime>>();
   final _titleController = TextEditingController();
+  final _shortDescriptionController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _tagsController = TextEditingController();
   final _tagsFocusNode = FocusNode();
@@ -65,6 +66,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
     super.initState();
     final task = widget.task;
     _titleController.text = task?.title ?? '';
+    _shortDescriptionController.text = task?.shortDescription ?? '';
     _descriptionController.text = task?.description ?? '';
     _tagsController.text = task?.tags.join(', ') ?? '';
     _status = task?.status ?? TaskStatus.planned;
@@ -75,6 +77,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
   @override
   void dispose() {
     _titleController.dispose();
+    _shortDescriptionController.dispose();
     _descriptionController.dispose();
     _tagsController.dispose();
     _tagsFocusNode.dispose();
@@ -88,7 +91,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
 
   bool _isDueDateValid(DateTime? dueAt) {
     if (dueAt == null) {
-      return false;
+      return true;
     }
     return !dueAt.isBefore(_tomorrowDate());
   }
@@ -237,10 +240,13 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
     final completedAt = status == TaskStatus.done
         ? existing?.completedAt ?? now
         : null;
+    final shortDescription = _shortDescriptionController.text.trim();
+    final description = _descriptionController.text.trim();
     final task = Task(
       id: existing?.id ?? const Uuid().v4(),
       title: _titleController.text.trim(),
-      description: _descriptionController.text.trim(),
+      shortDescription: shortDescription.isEmpty ? null : shortDescription,
+      description: description.isEmpty ? null : description,
       dueAt: _dueAt,
       status: status,
       tags: _parseTags(_tagsController.text),
@@ -298,6 +304,26 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
+                  controller: _shortDescriptionController,
+                  decoration: InputDecoration(
+                    labelText: l10n.shortDescriptionLabel,
+                  ),
+                  inputFormatters: [
+                    _singleLineFormatter,
+                    LengthLimitingTextInputFormatter(100),
+                  ],
+                  maxLength: 100,
+                  validator: (value) {
+                    final description = _descriptionController.text.trim();
+                    if ((value == null || value.trim().isEmpty) &&
+                        description.isEmpty) {
+                      return l10n.descriptionOrShortRequired;
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
                   controller: _descriptionController,
                   decoration: InputDecoration(
                     labelText: l10n.descriptionLabel,
@@ -305,14 +331,15 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                   keyboardType: TextInputType.multiline,
                   minLines: 1,
                   maxLines: null,
-                  maxLength: 100,
                   inputFormatters: [
                     _multiLineFormatter,
-                    LengthLimitingTextInputFormatter(100),
                   ],
                   validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return l10n.descriptionRequired;
+                    final shortDescription =
+                        _shortDescriptionController.text.trim();
+                    if ((value == null || value.trim().isEmpty) &&
+                        shortDescription.isEmpty) {
+                      return l10n.descriptionOrShortRequired;
                     }
                     return null;
                   },
@@ -345,9 +372,6 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                   key: _dueDateFieldKey,
                   initialValue: _dueAt,
                   validator: (value) {
-                    if (value == null) {
-                      return l10n.dueDateRequired;
-                    }
                     if (!_isDueDateValid(value)) {
                       return l10n.dueDateInvalid;
                     }
