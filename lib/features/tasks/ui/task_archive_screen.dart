@@ -17,6 +17,14 @@ class TaskArchiveScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Архив'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('К задачам'),
+          ),
+        ],
       ),
       body: archived.isEmpty
           ? const Center(
@@ -99,7 +107,7 @@ class TaskArchiveScreen extends ConsumerWidget {
   }
 }
 
-extension on List<Task> {
-   // ignore: strict_top_level_inference
-   get archived => null;
+extension TaskArchiveFilter on List<Task> {
+  List<Task> get archived =>
+      where((task) => task.status == TaskStatus.done).toList();
 }
