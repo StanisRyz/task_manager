@@ -485,7 +485,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
                         itemCount: suggestions.length,
-                        separatorBuilder: (_, __) => const Divider(height: 1),
+                        separatorBuilder: (_, _) => const Divider(height: 1),
                         itemBuilder: (context, index) {
                           final tag = suggestions[index];
                           final count = tagCounts[tag] ?? 0;
