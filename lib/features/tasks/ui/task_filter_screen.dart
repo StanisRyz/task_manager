@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../common/ui/swipe_back_wrapper.dart';
 import '../../../l10n/app_localizations_ext.dart';
 import '../data/task.dart';
 import '../state/tasks_controller.dart';
@@ -40,63 +41,65 @@ class _TaskFilterScreenState extends ConsumerState<TaskFilterScreen> {
       _selectedTag = null;
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.filtersTitle),
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: RadioGroup<String?>(
-                groupValue: _selectedTag,
-                onChanged: (value) {
-                  setState(() {
-                    _selectedTag = value;
-                  });
-                },
-                child: ListView(
-                  padding: const EdgeInsets.all(16),
-                  children: [
-                    Text(
-                      l10n.tagsTitle,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 12),
-                    RadioListTile<String?>(
-                      value: null,
-                      title: Text(l10n.allTags),
-                    ),
-                    if (sortedTags.isEmpty)
-                      Padding(
-                        padding: EdgeInsets.symmetric(vertical: 12),
-                        child: Text(l10n.noTags),
-                      )
-                    else
-                      ...sortedTags.map(
-                        (tag) => RadioListTile<String?>(
-                          value: tag,
-                          title: Text('$tag (${tagCounts[tag] ?? 0})'),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  key: const Key('task-filter-apply'),
-                  onPressed: () {
-                    Navigator.of(context).pop(_selectedTag);
+    return SwipeBackWrapper(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(l10n.filtersTitle),
+        ),
+        body: SafeArea(
+          child: Column(
+            children: [
+              Expanded(
+                child: RadioGroup<String?>(
+                  groupValue: _selectedTag,
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedTag = value;
+                    });
                   },
-                  child: Text(l10n.apply),
+                  child: ListView(
+                    padding: const EdgeInsets.all(16),
+                    children: [
+                      Text(
+                        l10n.tagsTitle,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 12),
+                      RadioListTile<String?>(
+                        value: null,
+                        title: Text(l10n.allTags),
+                      ),
+                      if (sortedTags.isEmpty)
+                        Padding(
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          child: Text(l10n.noTags),
+                        )
+                      else
+                        ...sortedTags.map(
+                          (tag) => RadioListTile<String?>(
+                            value: tag,
+                            title: Text('$tag (${tagCounts[tag] ?? 0})'),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    key: const Key('task-filter-apply'),
+                    onPressed: () {
+                      Navigator.of(context).pop(_selectedTag);
+                    },
+                    child: Text(l10n.apply),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

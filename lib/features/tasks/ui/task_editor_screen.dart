@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../common/ui/swipe_back_wrapper.dart';
 import '../../../l10n/app_localizations_ext.dart';
 import '../data/task.dart';
 import '../state/tasks_controller.dart';
@@ -233,249 +234,253 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
         ? l10n.dueDateNotSet
         : dateFormat.format(_dueAt!);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.task == null ? l10n.taskNewTitle : l10n.taskEditTitle,
+    return SwipeBackWrapper(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            widget.task == null ? l10n.taskNewTitle : l10n.taskEditTitle,
+          ),
         ),
-      ),
-      body: SafeArea(
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              TextFormField(
-                controller: _titleController,
-                decoration: InputDecoration(
-                  labelText: l10n.titleLabel,
-                ),
-                inputFormatters: [
-                  _singleLineFormatter,
-                ],
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return l10n.titleRequired;
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _descriptionController,
-                decoration: InputDecoration(
-                  labelText: l10n.descriptionLabel,
-                ),
-                keyboardType: TextInputType.multiline,
-                minLines: 1,
-                maxLines: null,
-                maxLength: 100,
-                inputFormatters: [
-                  _multiLineFormatter,
-                  LengthLimitingTextInputFormatter(100),
-                ],
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return l10n.descriptionRequired;
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<TaskStatus>(
-                initialValue: _status,
-                decoration: InputDecoration(
-                  labelText: l10n.statusLabel,
-                ),
-                items: _statusOptions
-                    .map(
-                      (status) => DropdownMenuItem(
-                        value: status,
-                        child: Text(status.label(l10n)),
-                      ),
-                    )
-                    .toList(),
-                onChanged: (value) {
-                  if (value == null) {
-                    return;
-                  }
-                  setState(() {
-                    _status = value;
-                  });
-                },
-              ),
-              const SizedBox(height: 16),
-              FormField<DateTime>(
-                key: _dueDateFieldKey,
-                initialValue: _dueAt,
-                validator: (value) {
-                  if (value == null) {
-                    return l10n.dueDateRequired;
-                  }
-                  if (!_isDueDateValid(value)) {
-                    return l10n.dueDateInvalid;
-                  }
-                  return null;
-                },
-                builder: (state) {
-                  final errorText = state.errorText;
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(l10n.dueDateTitle),
-                        subtitle: Text(dueLabel),
-                        trailing: Wrap(
-                          spacing: 8,
-                          children: [
-                            if (_dueAt != null)
-                              IconButton(
-                                tooltip: l10n.clearDate,
-                                onPressed: _clearDueDate,
-                                icon: const Icon(Icons.clear),
-                              ),
-                            IconButton(
-                              tooltip: l10n.pickDate,
-                              onPressed: _pickDate,
-                              icon: const Icon(Icons.event),
-                            ),
-                          ],
-                        ),
-                      ),
-                      if (errorText != null)
-                        Padding(
-                          padding: const EdgeInsets.only(left: 16),
-                          child: Text(
-                            errorText,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.copyWith(
-                                  color:
-                                      Theme.of(context).colorScheme.error,
-                                ),
-                          ),
-                        ),
-                    ],
-                  );
-                },
-              ),
-              const Divider(height: 32),
-              TextField(
-                controller: _tagsController,
-                autocorrect: false,
-                enableSuggestions: false,
-                autofillHints: const <String>[],
-                decoration: InputDecoration(
-                  labelText: l10n.tagsLabel,
-                ),
-                inputFormatters: [
-                  _singleLineFormatter,
-                ],
-              ),
-              ValueListenableBuilder<TextEditingValue>(
-                valueListenable: _tagsController,
-                builder: (context, value, child) {
-                  final prefix = _currentTagPrefix(
-                    value.text,
-                    value.selection.baseOffset,
-                  ).toLowerCase();
-                  if (prefix.isEmpty) {
-                    return const SizedBox.shrink();
-                  }
-                  final usedTags = _parseTags(value.text).toSet();
-                  final suggestions = knownTags
-                      .where(
-                        (tag) =>
-                            tag.toLowerCase().startsWith(prefix) &&
-                            !usedTags.contains(tag.toLowerCase()),
-                      )
-                      .toList();
-                  if (suggestions.isEmpty) {
-                    return const SizedBox.shrink();
-                  }
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Material(
-                      elevation: 2,
-                      borderRadius: BorderRadius.circular(12),
-                      child: ListView.separated(
-                        padding: const EdgeInsets.symmetric(vertical: 4),
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: suggestions.length,
-                        separatorBuilder: (_, _) => const Divider(height: 1),
-                        itemBuilder: (context, index) {
-                          final tag = suggestions[index];
-                          final count = tagCounts[tag] ?? 0;
-                          return ListTile(
-                            title: Text('$tag ($count)'),
-                            onTap: () => _insertTagSuggestion(tag),
-                          );
-                        },
-                      ),
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 16),
-              Text(
-                l10n.attachmentsTitle,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _attachmentController,
-                      decoration: InputDecoration(
-                        labelText: l10n.attachmentLabel,
-                      ),
-                      inputFormatters: [
-                        _singleLineFormatter,
-                      ],
-                    ),
+        body: SafeArea(
+          child: Form(
+            key: _formKey,
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                TextFormField(
+                  controller: _titleController,
+                  decoration: InputDecoration(
+                    labelText: l10n.titleLabel,
                   ),
-                  const SizedBox(width: 12),
-                  FilledButton(
-                    onPressed: _addAttachment,
-                    child: Text(l10n.add),
+                  inputFormatters: [
+                    _singleLineFormatter,
+                  ],
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return l10n.titleRequired;
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _descriptionController,
+                  decoration: InputDecoration(
+                    labelText: l10n.descriptionLabel,
                   ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              if (_attachments.isEmpty)
-                Text(
-                  l10n.noAttachments,
-                  style: Theme.of(context).textTheme.bodySmall,
-                )
-              else
-                Column(
-                  children: _attachments
+                  keyboardType: TextInputType.multiline,
+                  minLines: 1,
+                  maxLines: null,
+                  maxLength: 100,
+                  inputFormatters: [
+                    _multiLineFormatter,
+                    LengthLimitingTextInputFormatter(100),
+                  ],
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return l10n.descriptionRequired;
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<TaskStatus>(
+                  initialValue: _status,
+                  decoration: InputDecoration(
+                    labelText: l10n.statusLabel,
+                  ),
+                  items: _statusOptions
                       .map(
-                        (attachment) => ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          title: Text(attachment),
-                          trailing: IconButton(
-                            icon: const Icon(Icons.delete_outline),
-                            onPressed: () {
-                              setState(() {
-                                _attachments.remove(attachment);
-                              });
-                            },
-                          ),
+                        (status) => DropdownMenuItem(
+                          value: status,
+                          child: Text(status.label(l10n)),
                         ),
                       )
                       .toList(),
+                  onChanged: (value) {
+                    if (value == null) {
+                      return;
+                    }
+                    setState(() {
+                      _status = value;
+                    });
+                  },
                 ),
-              const SizedBox(height: 24),
-              FilledButton(
-                onPressed: _save,
-                child: Text(l10n.save),
-              ),
-            ],
+                const SizedBox(height: 16),
+                FormField<DateTime>(
+                  key: _dueDateFieldKey,
+                  initialValue: _dueAt,
+                  validator: (value) {
+                    if (value == null) {
+                      return l10n.dueDateRequired;
+                    }
+                    if (!_isDueDateValid(value)) {
+                      return l10n.dueDateInvalid;
+                    }
+                    return null;
+                  },
+                  builder: (state) {
+                    final errorText = state.errorText;
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(l10n.dueDateTitle),
+                          subtitle: Text(dueLabel),
+                          trailing: Wrap(
+                            spacing: 8,
+                            children: [
+                              if (_dueAt != null)
+                                IconButton(
+                                  tooltip: l10n.clearDate,
+                                  onPressed: _clearDueDate,
+                                  icon: const Icon(Icons.clear),
+                                ),
+                              IconButton(
+                                tooltip: l10n.pickDate,
+                                onPressed: _pickDate,
+                                icon: const Icon(Icons.event),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (errorText != null)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 16),
+                            child: Text(
+                              errorText,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .error,
+                                  ),
+                            ),
+                          ),
+                      ],
+                    );
+                  },
+                ),
+                const Divider(height: 32),
+                TextField(
+                  controller: _tagsController,
+                  autocorrect: false,
+                  enableSuggestions: false,
+                  autofillHints: const <String>[],
+                  decoration: InputDecoration(
+                    labelText: l10n.tagsLabel,
+                  ),
+                  inputFormatters: [
+                    _singleLineFormatter,
+                  ],
+                ),
+                ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: _tagsController,
+                  builder: (context, value, child) {
+                    final prefix = _currentTagPrefix(
+                      value.text,
+                      value.selection.baseOffset,
+                    ).toLowerCase();
+                    if (prefix.isEmpty) {
+                      return const SizedBox.shrink();
+                    }
+                    final usedTags = _parseTags(value.text).toSet();
+                    final suggestions = knownTags
+                        .where(
+                          (tag) =>
+                              tag.toLowerCase().startsWith(prefix) &&
+                              !usedTags.contains(tag.toLowerCase()),
+                        )
+                        .toList();
+                    if (suggestions.isEmpty) {
+                      return const SizedBox.shrink();
+                    }
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Material(
+                        elevation: 2,
+                        borderRadius: BorderRadius.circular(12),
+                        child: ListView.separated(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: suggestions.length,
+                          separatorBuilder: (_, _) =>
+                              const Divider(height: 1),
+                          itemBuilder: (context, index) {
+                            final tag = suggestions[index];
+                            final count = tagCounts[tag] ?? 0;
+                            return ListTile(
+                              title: Text('$tag ($count)'),
+                              onTap: () => _insertTagSuggestion(tag),
+                            );
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  l10n.attachmentsTitle,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _attachmentController,
+                        decoration: InputDecoration(
+                          labelText: l10n.attachmentLabel,
+                        ),
+                        inputFormatters: [
+                          _singleLineFormatter,
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    FilledButton(
+                      onPressed: _addAttachment,
+                      child: Text(l10n.add),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                if (_attachments.isEmpty)
+                  Text(
+                    l10n.noAttachments,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  )
+                else
+                  Column(
+                    children: _attachments
+                        .map(
+                          (attachment) => ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            title: Text(attachment),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.delete_outline),
+                              onPressed: () {
+                                setState(() {
+                                  _attachments.remove(attachment);
+                                });
+                              },
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                const SizedBox(height: 24),
+                FilledButton(
+                  onPressed: _save,
+                  child: Text(l10n.save),
+                ),
+              ],
+            ),
           ),
         ),
       ),
