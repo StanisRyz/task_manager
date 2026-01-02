@@ -29,6 +29,27 @@ final taskSortProvider =
 
 final taskTagFilterProvider = StateProvider<String?>((ref) => null);
 
+enum TaskDeadlineSort {
+  ascending,
+  descending,
+}
+
+extension TaskDeadlineSortLabel on TaskDeadlineSort {
+  String get label {
+    switch (this) {
+      case TaskDeadlineSort.ascending:
+        return 'По возрастанию срока';
+      case TaskDeadlineSort.descending:
+        return 'По убыванию срока';
+    }
+  }
+}
+
+final taskSortProvider =
+    StateProvider<TaskDeadlineSort>((ref) => TaskDeadlineSort.ascending);
+
+final taskTagFilterProvider = StateProvider<String?>((ref) => null);
+
 class TaskListScreen extends ConsumerWidget {
   const TaskListScreen({super.key});
 
@@ -296,6 +317,9 @@ class TaskListScreen extends ConsumerWidget {
                 );
               },
             ),
+          );
+        },
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           Navigator.of(context).push(
