@@ -1,0 +1,71 @@
+{
+  "@@locale": "en",
+  "appTitle": "Tasks",
+  "settingsTitle": "Settings",
+  "settingsThemeDark": "Dark theme",
+  "settingsLanguage": "Language",
+  "languageRussian": "Russian",
+  "languageEnglish": "English",
+  "filtersTitle": "Filters",
+  "tagsTitle": "Tags",
+  "allTags": "All tags",
+  "noTags": "No tags added yet",
+  "apply": "Apply",
+  "archiveTitle": "Archive",
+  "backToTasks": "Back to tasks",
+  "archiveEmpty": "Archive is empty",
+  "archivedOn": "Archived: {date}",
+  "@archivedOn": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "tasksTitle": "Tasks",
+  "filterTooltip": "Filters",
+  "sortTooltip": "Sort",
+  "archiveTooltip": "Archive",
+  "settingsTooltip": "Settings",
+  "tasksEmpty": "No tasks yet",
+  "sortAscending": "Ascending by due date",
+  "sortDescending": "Descending by due date",
+  "remainingDays": "{days, plural, one{# day left} other{# days left}}",
+  "@remainingDays": {
+    "placeholders": {
+      "days": {}
+    }
+  },
+  "dueLabel": "Due: {date} ({remaining})",
+  "@dueLabel": {
+    "placeholders": {
+      "date": {},
+      "remaining": {}
+    }
+  },
+  "newTask": "New task",
+  "markCompletedTitle": "Mark as done",
+  "markCompletedMessage": "Move the task to the archive?",
+  "no": "No",
+  "yes": "Yes",
+  "taskNewTitle": "New task",
+  "taskEditTitle": "Edit task",
+  "titleLabel": "Title",
+  "titleRequired": "Enter a task title",
+  "descriptionLabel": "Description",
+  "descriptionRequired": "Enter a task description",
+  "statusLabel": "Status",
+  "statusPlanned": "Planned",
+  "statusInProgress": "In progress",
+  "statusDone": "Done",
+  "dueDateRequired": "Select a due date",
+  "dueDateInvalid": "Due date must be no earlier than tomorrow",
+  "dueDateTitle": "Due date",
+  "dueDateNotSet": "Not set",
+  "clearDate": "Clear date",
+  "pickDate": "Pick date",
+  "tagsLabel": "Tags (comma-separated)",
+  "attachmentsTitle": "Attachments",
+  "attachmentLabel": "Add attachment (text)",
+  "add": "Add",
+  "noAttachments": "No attachments",
+  "save": "Save"
+}

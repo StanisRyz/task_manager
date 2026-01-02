@@ -4,8 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../l10n/app_localizations_ext.dart';
 import '../data/task.dart';
 import '../state/tasks_controller.dart';
+import 'task_status_label.dart';
 
 class TaskEditorScreen extends ConsumerStatefulWidget {
   const TaskEditorScreen({super.key, this.task});
@@ -90,7 +92,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
       initialDate: initial,
       firstDate: minDate,
       lastDate: DateTime(now.year + 10),
-      locale: const Locale('ru'),
+      locale: Localizations.localeOf(context),
     );
     if (picked != null) {
       setState(() {
@@ -221,17 +223,21 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final tasks = ref.watch(tasksControllerProvider);
     final tagCounts = _collectTagCounts(tasks);
     final knownTags = tagCounts.keys.toList()..sort();
-    final dateFormat = DateFormat('dd.MM.yyyy');
+    final localeTag = Localizations.localeOf(context).toLanguageTag();
+    final dateFormat = DateFormat('dd.MM.yyyy', localeTag);
     final dueLabel = _dueAt == null
-        ? 'Не задан'
+        ? l10n.dueDateNotSet
         : dateFormat.format(_dueAt!);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.task == null ? 'Новая задача' : 'Редактирование'),
+        title: Text(
+          widget.task == null ? l10n.taskNewTitle : l10n.taskEditTitle,
+        ),
       ),
       body: SafeArea(
         child: Form(
@@ -241,15 +247,15 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
             children: [
               TextFormField(
                 controller: _titleController,
-                decoration: const InputDecoration(
-                  labelText: 'Название',
+                decoration: InputDecoration(
+                  labelText: l10n.titleLabel,
                 ),
                 inputFormatters: [
                   _singleLineFormatter,
                 ],
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Введите название задачи';
+                    return l10n.titleRequired;
                   }
                   return null;
                 },
@@ -257,8 +263,8 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Описание',
+                decoration: InputDecoration(
+                  labelText: l10n.descriptionLabel,
                 ),
                 keyboardType: TextInputType.multiline,
                 minLines: 1,
@@ -270,7 +276,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                 ],
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Введите описание задачи';
+                    return l10n.descriptionRequired;
                   }
                   return null;
                 },
@@ -278,14 +284,14 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
               const SizedBox(height: 16),
               DropdownButtonFormField<TaskStatus>(
                 initialValue: _status,
-                decoration: const InputDecoration(
-                  labelText: 'Статус',
+                decoration: InputDecoration(
+                  labelText: l10n.statusLabel,
                 ),
                 items: _statusOptions
                     .map(
                       (status) => DropdownMenuItem(
                         value: status,
-                        child: Text(status.label),
+                        child: Text(status.label(l10n)),
                       ),
                     )
                     .toList(),
@@ -304,10 +310,10 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                 initialValue: _dueAt,
                 validator: (value) {
                   if (value == null) {
-                    return 'Укажите срок';
+                    return l10n.dueDateRequired;
                   }
                   if (!_isDueDateValid(value)) {
-                    return 'Срок должен быть не раньше завтрашнего дня';
+                    return l10n.dueDateInvalid;
                   }
                   return null;
                 },
@@ -318,19 +324,19 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                     children: [
                       ListTile(
                         contentPadding: EdgeInsets.zero,
-                        title: const Text('Срок'),
+                        title: Text(l10n.dueDateTitle),
                         subtitle: Text(dueLabel),
                         trailing: Wrap(
                           spacing: 8,
                           children: [
                             if (_dueAt != null)
                               IconButton(
-                                tooltip: 'Очистить дату',
+                                tooltip: l10n.clearDate,
                                 onPressed: _clearDueDate,
                                 icon: const Icon(Icons.clear),
                               ),
                             IconButton(
-                              tooltip: 'Выбрать дату',
+                              tooltip: l10n.pickDate,
                               onPressed: _pickDate,
                               icon: const Icon(Icons.event),
                             ),
@@ -361,8 +367,8 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                 autocorrect: false,
                 enableSuggestions: false,
                 autofillHints: const <String>[],
-                decoration: const InputDecoration(
-                  labelText: 'Теги (через запятую)',
+                decoration: InputDecoration(
+                  labelText: l10n.tagsLabel,
                 ),
                 inputFormatters: [
                   _singleLineFormatter,
@@ -415,7 +421,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                'Вложения',
+                l10n.attachmentsTitle,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
@@ -424,8 +430,8 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                   Expanded(
                     child: TextField(
                       controller: _attachmentController,
-                      decoration: const InputDecoration(
-                        labelText: 'Добавить вложение (строка)',
+                      decoration: InputDecoration(
+                        labelText: l10n.attachmentLabel,
                       ),
                       inputFormatters: [
                         _singleLineFormatter,
@@ -435,14 +441,14 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                   const SizedBox(width: 12),
                   FilledButton(
                     onPressed: _addAttachment,
-                    child: const Text('Добавить'),
+                    child: Text(l10n.add),
                   ),
                 ],
               ),
               const SizedBox(height: 12),
               if (_attachments.isEmpty)
                 Text(
-                  'Вложений нет',
+                  l10n.noAttachments,
                   style: Theme.of(context).textTheme.bodySmall,
                 )
               else
@@ -467,7 +473,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
               const SizedBox(height: 24),
               FilledButton(
                 onPressed: _save,
-                child: const Text('Сохранить'),
+                child: Text(l10n.save),
               ),
             ],
           ),
