@@ -192,7 +192,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                 minLines: 1,
                 maxLines: null,
                 maxLength: 100,
-                inputFormatters: const [
+                inputFormatters: [
                   LengthLimitingTextInputFormatter(100),
                 ],
                 validator: (value) {
