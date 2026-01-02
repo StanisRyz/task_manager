@@ -386,7 +386,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                           padding: const EdgeInsets.symmetric(vertical: 4),
                           shrinkWrap: true,
                           itemCount: options.length,
-                          separatorBuilder: (_, __) =>
+                          separatorBuilder: (_, _) =>
                               const Divider(height: 1),
                           itemBuilder: (context, index) {
                             final option = options.elementAt(index);
