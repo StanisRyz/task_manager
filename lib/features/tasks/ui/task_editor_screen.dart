@@ -16,6 +16,11 @@ class TaskEditorScreen extends ConsumerStatefulWidget {
   ConsumerState<TaskEditorScreen> createState() => _TaskEditorScreenState();
 }
 
+final _singleLineAllowedCharacters =
+    RegExp(r'[\p{L}\p{M}\p{N}\p{P}\p{S}\p{Z}]', unicode: true);
+final _multiLineAllowedCharacters =
+    RegExp(r'[\p{L}\p{M}\p{N}\p{P}\p{S}\p{Z}\n]', unicode: true);
+
 class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
   final _formKey = GlobalKey<FormState>();
   final _dueDateFieldKey = GlobalKey<FormFieldState<DateTime>>();
@@ -24,6 +29,10 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
   final _tagsController = TextEditingController();
   final _attachmentController = TextEditingController();
   final _tagsFocusNode = FocusNode();
+  final _singleLineFormatter =
+      FilteringTextInputFormatter.allow(_singleLineAllowedCharacters);
+  final _multiLineFormatter =
+      FilteringTextInputFormatter.allow(_multiLineAllowedCharacters);
 
   late TaskStatus _status;
   DateTime? _dueAt;
@@ -235,6 +244,9 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                 decoration: const InputDecoration(
                   labelText: 'Название',
                 ),
+                inputFormatters: [
+                  _singleLineFormatter,
+                ],
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
                     return 'Введите название задачи';
@@ -253,6 +265,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                 maxLines: null,
                 maxLength: 100,
                 inputFormatters: [
+                  _multiLineFormatter,
                   LengthLimitingTextInputFormatter(100),
                 ],
                 validator: (value) {
@@ -351,6 +364,9 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                 decoration: const InputDecoration(
                   labelText: 'Теги (через запятую)',
                 ),
+                inputFormatters: [
+                  _singleLineFormatter,
+                ],
               ),
               ValueListenableBuilder<TextEditingValue>(
                 valueListenable: _tagsController,
@@ -411,6 +427,9 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                       decoration: const InputDecoration(
                         labelText: 'Добавить вложение (строка)',
                       ),
+                      inputFormatters: [
+                        _singleLineFormatter,
+                      ],
                     ),
                   ),
                   const SizedBox(width: 12),
