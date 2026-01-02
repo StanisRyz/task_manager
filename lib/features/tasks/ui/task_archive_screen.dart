@@ -2,38 +2,42 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../l10n/app_localizations_ext.dart';
 import '../data/task.dart';
 import '../state/tasks_controller.dart';
 import 'task_editor_screen.dart';
+import 'task_status_label.dart';
 
 class TaskArchiveScreen extends ConsumerWidget {
   const TaskArchiveScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final archived = ref.watch(tasksControllerProvider).archived;
     final scheme = Theme.of(context).colorScheme;
     final isDark = scheme.brightness == Brightness.dark;
     final cardColor = isDark
         ? scheme.surfaceContainerHighest
         : scheme.surfaceContainerLow;
-    final dateFormat = DateFormat('dd.MM.yyyy');
+    final localeTag = Localizations.localeOf(context).toLanguageTag();
+    final dateFormat = DateFormat('dd.MM.yyyy', localeTag);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Архив'),
+        title: Text(l10n.archiveTitle),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
             },
-            child: const Text('К задачам'),
+            child: Text(l10n.backToTasks),
           ),
         ],
       ),
       body: archived.isEmpty
-          ? const Center(
-              child: Text('Архив пуст'),
+          ? Center(
+              child: Text(l10n.archiveEmpty),
             )
           : ListView.separated(
               padding: const EdgeInsets.all(16),
@@ -43,7 +47,9 @@ class TaskArchiveScreen extends ConsumerWidget {
                 final task = archived[index];
                 final archivedLabel = task.completedAt == null
                     ? null
-                    : 'Архив: ${dateFormat.format(task.completedAt!)}';
+                    : l10n.archivedOn(
+                        dateFormat.format(task.completedAt!),
+                      );
 
                 return Material(
                   color: cardColor,
@@ -73,7 +79,7 @@ class TaskArchiveScreen extends ConsumerWidget {
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            task.status.label,
+                            task.status.label(l10n),
                             style: Theme.of(context)
                                 .textTheme
                                 .labelLarge

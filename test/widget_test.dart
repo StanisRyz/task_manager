@@ -6,6 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 
 import 'package:task_manager/app.dart';
+import 'package:task_manager/features/settings/data/settings_repository.dart';
+import 'package:task_manager/features/settings/state/locale_provider.dart';
 import 'package:task_manager/features/tasks/data/task.dart';
 import 'package:task_manager/features/tasks/data/tasks_repository.dart';
 import 'package:task_manager/features/tasks/state/tasks_controller.dart';
@@ -15,6 +17,7 @@ void main() {
 
   late Directory tempDir;
   late Box<Task> box;
+  late Box<String> settingsBox;
 
   setUpAll(() async {
     tempDir = await Directory.systemTemp.createTemp('task_manager_test');
@@ -22,6 +25,7 @@ void main() {
     Hive.registerAdapter(TaskStatusAdapter());
     Hive.registerAdapter(TaskAdapter());
     box = await Hive.openBox<Task>('tasks_test');
+    settingsBox = await Hive.openBox<String>('settings_test');
   });
 
   setUp(() async {
@@ -30,6 +34,7 @@ void main() {
 
   tearDownAll(() async {
     await box.close();
+    await settingsBox.close();
     await tempDir.delete(recursive: true);
   });
 
@@ -85,6 +90,8 @@ void main() {
       ProviderScope(
         overrides: [
           tasksRepositoryProvider.overrideWithValue(repository),
+          settingsRepositoryProvider
+              .overrideWithValue(SettingsRepository(settingsBox)),
         ],
         child: const TaskManagerApp(),
       ),

@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../settings/ui/settings_screen.dart';
+import '../../../l10n/app_localizations_ext.dart';
 import '../data/task.dart';
 import '../state/tasks_controller.dart';
 import 'task_archive_screen.dart';
 import 'task_editor_screen.dart';
 import 'task_filter_screen.dart';
+import 'task_status_label.dart';
 
 enum TaskDeadlineSort {
   ascending,
@@ -15,12 +18,12 @@ enum TaskDeadlineSort {
 }
 
 extension TaskDeadlineSortLabel on TaskDeadlineSort {
-  String get label {
+  String label(AppLocalizations l10n) {
     switch (this) {
       case TaskDeadlineSort.ascending:
-        return 'По возрастанию срока';
+        return l10n.sortAscending;
       case TaskDeadlineSort.descending:
-        return 'По убыванию срока';
+        return l10n.sortDescending;
     }
   }
 }
@@ -33,26 +36,24 @@ final taskTagFilterProvider = StateProvider<String?>((ref) => null);
 class TaskListScreen extends ConsumerWidget {
   const TaskListScreen({super.key});
 
-  String _formatRemainingDays(int days) {
-    final mod10 = days % 10;
-    final mod100 = days % 100;
-    if (mod10 == 1 && mod100 != 11) {
-      return 'осталось $days день';
-    }
-    if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
-      return 'осталось $days дня';
-    }
-    return 'осталось $days дней';
+  String _formatRemainingDays(AppLocalizations l10n, int days) {
+    return l10n.remainingDays(days);
   }
 
-  String _formatDueLabel(DateTime dueAt, DateFormat dateFormat) {
+  String _formatDueLabel(
+    AppLocalizations l10n,
+    DateTime dueAt,
+    DateFormat dateFormat,
+  ) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final dueDate = DateTime(dueAt.year, dueAt.month, dueAt.day);
     final remainingDays = dueDate.difference(today).inDays;
     final safeDays = remainingDays < 0 ? 0 : remainingDays;
-    return 'Срок: ${dateFormat.format(dueDate)} '
-        '(${_formatRemainingDays(safeDays)})';
+    return l10n.dueLabel(
+      dateFormat.format(dueDate),
+      _formatRemainingDays(l10n, safeDays),
+    );
   }
 
   List<Task> _sortTasks(List<Task> tasks, TaskDeadlineSort sort) {
@@ -97,6 +98,7 @@ class TaskListScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final tasks = ref.watch(tasksControllerProvider);
     final scheme = Theme.of(context).colorScheme;
     final isDark = scheme.brightness == Brightness.dark;
@@ -105,7 +107,8 @@ class TaskListScreen extends ConsumerWidget {
         : scheme.surfaceContainerLow;
     final visibleTasks =
         tasks.where((task) => task.status != TaskStatus.done).toList();
-    final dateFormat = DateFormat('dd.MM.yyyy');
+    final localeTag = Localizations.localeOf(context).toLanguageTag();
+    final dateFormat = DateFormat('dd.MM.yyyy', localeTag);
     final selectedSort = ref.watch(taskSortProvider);
     final selectedTag = ref.watch(taskTagFilterProvider);
 
@@ -143,17 +146,17 @@ class TaskListScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Задачи'),
+        title: Text(l10n.tasksTitle),
         actions: [
           IconButton(
             key: const Key('open-filter-button'),
-            tooltip: 'Фильтры',
+            tooltip: l10n.filterTooltip,
             icon: const Icon(Icons.filter_alt_outlined),
             onPressed: openFilterScreen,
           ),
           PopupMenuButton<TaskDeadlineSort>(
             key: const Key('sort-menu-button'),
-            tooltip: 'Сортировка',
+            tooltip: l10n.sortTooltip,
             icon: const Icon(Icons.swap_vert),
             onSelected: (value) {
               ref.read(taskSortProvider.notifier).state = value;
@@ -162,13 +165,13 @@ class TaskListScreen extends ConsumerWidget {
                 .map(
                   (sort) => PopupMenuItem(
                     value: sort,
-                    child: Text(sort.label),
+                    child: Text(sort.label(l10n)),
                   ),
                 )
                 .toList(),
           ),
           IconButton(
-            tooltip: 'Архив',
+            tooltip: l10n.archiveTooltip,
             icon: const Icon(Icons.archive_outlined),
             onPressed: () {
               Navigator.of(context).push(
@@ -179,7 +182,7 @@ class TaskListScreen extends ConsumerWidget {
             },
           ),
           IconButton(
-            tooltip: 'Настройки',
+            tooltip: l10n.settingsTooltip,
             icon: const Icon(Icons.settings_outlined),
             onPressed: () {
               Navigator.of(context).push(
@@ -192,8 +195,8 @@ class TaskListScreen extends ConsumerWidget {
         ],
       ),
       body: sortedTasks.isEmpty
-          ? const Center(
-              child: Text('Задач пока нет'),
+          ? Center(
+              child: Text(l10n.tasksEmpty),
             )
           : ListView.separated(
               padding: const EdgeInsets.all(16),
@@ -203,7 +206,7 @@ class TaskListScreen extends ConsumerWidget {
                 final task = sortedTasks[index];
                 final dueLabel = task.dueAt == null
                     ? null
-                    : _formatDueLabel(task.dueAt!, dateFormat);
+                    : _formatDueLabel(l10n, task.dueAt!, dateFormat);
 
                 return Material(
                   color: cardColor,
@@ -240,7 +243,7 @@ class TaskListScreen extends ConsumerWidget {
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
-                                  task.status.label,
+                                  task.status.label(l10n),
                                   style: Theme.of(context)
                                       .textTheme
                                       .labelLarge
@@ -284,24 +287,22 @@ class TaskListScreen extends ConsumerWidget {
                                   await showDialog<bool>(
                                 context: context,
                                 builder: (dialogContext) => AlertDialog(
-                                  title: const Text('Отметить выполненной'),
-                                  content: const Text(
-                                    'Перенести задачу в архив?',
-                                  ),
+                                  title: Text(l10n.markCompletedTitle),
+                                  content: Text(l10n.markCompletedMessage),
                                   actions: [
                                     TextButton(
                                       onPressed: () {
                                         Navigator.of(dialogContext)
                                             .pop(false);
                                       },
-                                      child: const Text('Нет'),
+                                      child: Text(l10n.no),
                                     ),
                                     FilledButton(
                                       onPressed: () {
                                         Navigator.of(dialogContext)
                                             .pop(true);
                                       },
-                                      child: const Text('Да'),
+                                      child: Text(l10n.yes),
                                     ),
                                   ],
                                 ),
@@ -332,7 +333,7 @@ class TaskListScreen extends ConsumerWidget {
           );
         },
         icon: const Icon(Icons.add),
-        label: const Text('Новая задача'),
+        label: Text(l10n.newTask),
       ),
     );
   }

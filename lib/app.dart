@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import 'features/settings/state/locale_provider.dart';
 import 'features/settings/state/theme_mode_provider.dart';
 import 'features/tasks/ui/task_list_screen.dart';
+import 'l10n/app_localizations_ext.dart';
 
 class TaskManagerApp extends ConsumerWidget {
   const TaskManagerApp({super.key});
@@ -31,13 +34,14 @@ class TaskManagerApp extends ConsumerWidget {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Задачи',
+      onGenerateTitle: (context) => context.l10n.appTitle,
       theme: _buildTheme(lightScheme),
       darkTheme: _buildTheme(darkScheme),
       themeMode: themeMode,
-      locale: const Locale('ru'),
-      supportedLocales: const [Locale('ru')],
+      locale: ref.watch(localeProvider),
+      supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: const [
+        AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
