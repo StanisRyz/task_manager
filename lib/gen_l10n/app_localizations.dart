@@ -458,6 +458,18 @@ abstract class AppLocalizations {
   /// **'Вложений нет'**
   String get noAttachments;
 
+  /// No description provided for @attachmentMissing.
+  ///
+  /// In ru, this message translates to:
+  /// **'Файл вложения не найден'**
+  String get attachmentMissing;
+
+  /// No description provided for @attachmentOpenFailed.
+  ///
+  /// In ru, this message translates to:
+  /// **'Не удалось открыть вложение'**
+  String get attachmentOpenFailed;
+
   /// No description provided for @save.
   ///
   /// In ru, this message translates to:

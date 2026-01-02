@@ -204,5 +204,11 @@ class AppLocalizationsRu extends AppLocalizations {
   String get noAttachments => 'Вложений нет';
 
   @override
+  String get attachmentMissing => 'Файл вложения не найден';
+
+  @override
+  String get attachmentOpenFailed => 'Не удалось открыть вложение';
+
+  @override
   String get save => 'Сохранить';
 }

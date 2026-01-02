@@ -202,5 +202,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noAttachments => 'No attachments';
 
   @override
+  String get attachmentMissing => 'Attachment file is missing';
+
+  @override
+  String get attachmentOpenFailed => 'Could not open the attachment';
+
+  @override
   String get save => 'Save';
 }
