@@ -13,6 +13,8 @@ class TaskListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tasks = ref.watch(tasksControllerProvider);
+    final visibleTasks =
+        tasks.where((task) => task.status != TaskStatus.done).toList();
     final dateFormat = DateFormat('dd.MM.yyyy');
 
     return Scaffold(
@@ -32,16 +34,16 @@ class TaskListScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: tasks.isEmpty
+      body: visibleTasks.isEmpty
           ? const Center(
               child: Text('Задач пока нет'),
             )
           : ListView.separated(
               padding: const EdgeInsets.all(16),
-              itemCount: tasks.length,
+              itemCount: visibleTasks.length,
               separatorBuilder: (_, _) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
-                final task = tasks[index];
+                final task = visibleTasks[index];
                 final dueLabel = task.dueAt == null
                     ? null
                     : 'Срок: ${dateFormat.format(task.dueAt!)}';
@@ -115,10 +117,38 @@ class TaskListScreen extends ConsumerWidget {
                           const SizedBox(width: 12),
                           Checkbox(
                             value: task.status == TaskStatus.done,
-                            onChanged: (_) {
-                              ref
-                                  .read(tasksControllerProvider.notifier)
-                                  .toggleDone(task.id);
+                            onChanged: (value) async {
+                              if (value != true) {
+                                return;
+                              }
+                              final shouldComplete = await showDialog<bool>(
+                                context: context,
+                                builder: (dialogContext) => AlertDialog(
+                                  title: const Text('Отметить выполненной'),
+                                  content: const Text(
+                                    'Перенести задачу в архив?',
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(dialogContext).pop(false);
+                                      },
+                                      child: const Text('Нет'),
+                                    ),
+                                    FilledButton(
+                                      onPressed: () {
+                                        Navigator.of(dialogContext).pop(true);
+                                      },
+                                      child: const Text('Да'),
+                                    ),
+                                  ],
+                                ),
+                              );
+                              if (shouldComplete == true) {
+                                await ref
+                                    .read(tasksControllerProvider.notifier)
+                                    .toggleDone(task.id);
+                              }
                             },
                           ),
                         ],
