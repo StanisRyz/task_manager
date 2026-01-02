@@ -17,6 +17,14 @@ class TaskArchiveScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Архив'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('К задачам'),
+          ),
+        ],
       ),
       body: archived.isEmpty
           ? const Center(
@@ -28,9 +36,9 @@ class TaskArchiveScreen extends ConsumerWidget {
               separatorBuilder: (_, _) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
                 final task = archived[index];
-                final archivedLabel = task.archivedAt == null
+                final archivedLabel = task.completedAt == null
                     ? null
-                    : 'Архив: ${dateFormat.format(task.archivedAt!)}';
+                    : 'Архив: ${dateFormat.format(task.completedAt!)}';
 
                 return Material(
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
@@ -99,7 +107,7 @@ class TaskArchiveScreen extends ConsumerWidget {
   }
 }
 
-extension on List<Task> {
-   // ignore: strict_top_level_inference
-   get archived => null;
+extension TaskArchiveFilter on List<Task> {
+  List<Task> get archived =>
+      where((task) => task.status == TaskStatus.done).toList();
 }
