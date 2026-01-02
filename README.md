@@ -1,16 +1,21 @@
-# task_manager
+# Task Manager (MVP)
 
-A new Flutter project.
+Офлайн-приложение для управления личными задачами на Flutter (Android), с русским интерфейсом и локальным хранением данных.
 
-## Getting Started
+## Возможности MVP
+- Создание и редактирование задач.
+- Отметка выполнения/снятие выполнения.
+- Поля: заголовок, описание, срок, статус, теги, вложения (строки).
+- Локальное хранение в Hive без сети и аккаунтов.
 
-This project is a starting point for a Flutter application.
+## Запуск
+```bash
+flutter pub get
+flutter run
+```
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Тесты и анализ
+```bash
+flutter analyze
+flutter test
+```
