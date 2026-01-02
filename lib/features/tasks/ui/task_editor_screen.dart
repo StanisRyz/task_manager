@@ -23,6 +23,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
   final _descriptionController = TextEditingController();
   final _tagsController = TextEditingController();
   final _attachmentController = TextEditingController();
+  final _tagsFocusNode = FocusNode();
 
   late TaskStatus _status;
   DateTime? _dueAt;
@@ -46,6 +47,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
     _descriptionController.dispose();
     _tagsController.dispose();
     _attachmentController.dispose();
+    _tagsFocusNode.dispose();
     super.dispose();
   }
 
@@ -124,6 +126,55 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
     return parts;
   }
 
+  List<String> _collectTags(List<Task> tasks) {
+    final unique = <String>{};
+    for (final task in tasks) {
+      unique.addAll(task.tags);
+    }
+    final tags = unique.toList()..sort();
+    return tags;
+  }
+
+  String _currentTagPrefix(String text, int cursor) {
+    final safeCursor = cursor.clamp(0, text.length);
+    final lastComma = text.lastIndexOf(',', safeCursor - 1);
+    final start = lastComma == -1 ? 0 : lastComma + 1;
+    return text.substring(start, safeCursor).trim();
+  }
+
+  void _insertTagSuggestion(String suggestion) {
+    final text = _tagsController.text;
+    final selection = _tagsController.selection;
+    final cursor = selection.baseOffset == -1 ? text.length : selection.baseOffset;
+    final safeCursor = cursor.clamp(0, text.length);
+    final lastComma = text.lastIndexOf(',', safeCursor - 1);
+    final start = lastComma == -1 ? 0 : lastComma + 1;
+    final nextComma = text.indexOf(',', safeCursor);
+    final end = nextComma == -1 ? text.length : nextComma;
+
+    var before = text.substring(0, start);
+    var after = text.substring(end);
+
+    if (before.isNotEmpty) {
+      before = before.replaceAll(RegExp(r'\s+$'), '');
+      if (!before.endsWith(',')) {
+        before = '$before,';
+      }
+      before = '$before ';
+    }
+
+    if (after.isNotEmpty) {
+      after = after.replaceFirst(RegExp(r'^\s+'), '');
+    }
+
+    final nextText = '$before$suggestion$after';
+    final nextCursor = (before.length + suggestion.length).clamp(0, nextText.length);
+    _tagsController.value = TextEditingValue(
+      text: nextText,
+      selection: TextSelection.collapsed(offset: nextCursor),
+    );
+  }
+
   Future<void> _save() async {
     if (!(_formKey.currentState?.validate() ?? false)) {
       return;
@@ -155,6 +206,8 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final tasks = ref.watch(tasksControllerProvider);
+    final knownTags = _collectTags(tasks);
     final dateFormat = DateFormat('dd.MM.yyyy');
     final dueLabel = _dueAt == null
         ? 'Не задан'
@@ -283,11 +336,70 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                 },
               ),
               const Divider(height: 32),
-              TextField(
-                controller: _tagsController,
-                decoration: const InputDecoration(
-                  labelText: 'Теги (через запятую)',
-                ),
+              RawAutocomplete<String>(
+                textEditingController: _tagsController,
+                focusNode: _tagsFocusNode,
+                optionsBuilder: (value) {
+                  final prefix = _currentTagPrefix(
+                    value.text,
+                    value.selection.baseOffset,
+                  ).toLowerCase();
+                  if (prefix.isEmpty) {
+                    return const Iterable<String>.empty();
+                  }
+                  final usedTags = _parseTags(value.text).toSet();
+                  return knownTags.where(
+                    (tag) =>
+                        tag.toLowerCase().startsWith(prefix) &&
+                        !usedTags.contains(tag.toLowerCase()),
+                  );
+                },
+                onSelected: _insertTagSuggestion,
+                fieldViewBuilder: (
+                  context,
+                  controller,
+                  focusNode,
+                  onFieldSubmitted,
+                ) {
+                  return TextField(
+                    controller: controller,
+                    focusNode: focusNode,
+                    decoration: const InputDecoration(
+                      labelText: 'Теги (через запятую)',
+                    ),
+                  );
+                },
+                optionsViewBuilder: (context, onSelected, options) {
+                  if (options.isEmpty) {
+                    return const SizedBox.shrink();
+                  }
+                  final box = context.findRenderObject() as RenderBox?;
+                  final width = box?.size.width ?? 200;
+                  return Align(
+                    alignment: Alignment.topLeft,
+                    child: Material(
+                      elevation: 4,
+                      borderRadius: BorderRadius.circular(12),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth: width),
+                        child: ListView.separated(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          shrinkWrap: true,
+                          itemCount: options.length,
+                          separatorBuilder: (_, __) =>
+                              const Divider(height: 1),
+                          itemBuilder: (context, index) {
+                            final option = options.elementAt(index);
+                            return ListTile(
+                              title: Text(option),
+                              onTap: () => onSelected(option),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 16),
               Text(
