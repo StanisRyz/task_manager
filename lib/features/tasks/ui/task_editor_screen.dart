@@ -28,24 +28,6 @@ final _singleLineAllowedCharacters =
     RegExp(r'[\p{L}\p{M}\p{N}\p{P}\p{S}\p{Z}]', unicode: true);
 final _multiLineAllowedCharacters =
     RegExp(r'[\p{L}\p{M}\p{N}\p{P}\p{S}\p{Z}\n]', unicode: true);
-const _documentExtensions = <String>[
-  'pdf',
-  'doc',
-  'docx',
-  'txt',
-  'rtf',
-  'xls',
-  'xlsx',
-  'ppt',
-  'pptx',
-];
-
-enum AttachmentType {
-  photo,
-  video,
-  document,
-}
-
 class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
   final _formKey = GlobalKey<FormState>();
   final _dueDateFieldKey = GlobalKey<FormFieldState<DateTime>>();
@@ -62,7 +44,6 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
   late TaskStatus _status;
   DateTime? _dueAt;
   late List<String> _attachments;
-  AttachmentType _attachmentType = AttachmentType.photo;
 
   @override
   void initState() {
@@ -146,15 +127,9 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
     return true;
   }
 
-  Future<void> _pickAttachment(AttachmentType type) async {
+  Future<void> _pickAttachment() async {
     final result = await FilePicker.platform.pickFiles(
-      type: type == AttachmentType.document
-          ? FileType.custom
-          : type == AttachmentType.photo
-              ? FileType.image
-              : FileType.video,
-      allowedExtensions:
-          type == AttachmentType.document ? _documentExtensions : null,
+      type: FileType.any,
     );
     if (result == null) {
       return;
@@ -516,48 +491,13 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: DropdownButtonFormField<AttachmentType>(
-                        initialValue: _attachmentType,
-                        decoration: InputDecoration(
-                          labelText: l10n.attachmentTypeLabel,
-                        ),
-                        items: AttachmentType.values
-                            .map(
-                              (type) => DropdownMenuItem(
-                                value: type,
-                                child: Text(
-                                  switch (type) {
-                                    AttachmentType.photo =>
-                                      l10n.attachmentTypePhoto,
-                                    AttachmentType.video =>
-                                      l10n.attachmentTypeVideo,
-                                    AttachmentType.document =>
-                                      l10n.attachmentTypeDocument,
-                                  },
-                                ),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (value) {
-                          if (value == null) {
-                            return;
-                          }
-                          setState(() {
-                            _attachmentType = value;
-                          });
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    FilledButton.icon(
-                      onPressed: () => _pickAttachment(_attachmentType),
-                      icon: const Icon(Icons.attach_file),
-                      label: Text(l10n.addAttachmentFile),
-                    ),
-                  ],
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: FilledButton.icon(
+                    onPressed: _pickAttachment,
+                    icon: const Icon(Icons.attach_file),
+                    label: Text(l10n.addAttachmentFile),
+                  ),
                 ),
                 const SizedBox(height: 12),
                 if (_attachments.isEmpty)
@@ -573,11 +513,6 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                             contentPadding: EdgeInsets.zero,
                             leading: AttachmentPreview(path: attachment),
                             title: Text(_attachmentLabel(attachment)),
-                            subtitle: Text(
-                              attachment,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
                             onTap: () => _openAttachment(attachment),
                             trailing: IconButton(
                               icon: const Icon(Icons.delete_outline),

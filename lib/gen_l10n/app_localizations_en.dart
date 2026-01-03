@@ -184,18 +184,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get attachmentsTitle => 'Attachments';
 
   @override
-  String get attachmentTypeLabel => 'Attachment type';
-
-  @override
-  String get attachmentTypePhoto => 'Photo';
-
-  @override
-  String get attachmentTypeVideo => 'Video';
-
-  @override
-  String get attachmentTypeDocument => 'Document';
-
-  @override
   String get addAttachmentFile => 'Add file';
 
   @override
