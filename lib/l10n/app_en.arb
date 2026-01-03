@@ -73,5 +73,7 @@
   "noAttachments": "No attachments",
   "attachmentMissing": "Attachment file is missing",
   "attachmentOpenFailed": "Could not open the attachment",
-  "save": "Save"
+  "save": "Save",
+  "taskColorTitle": "Task color",
+  "confirm": "Confirm"
 }

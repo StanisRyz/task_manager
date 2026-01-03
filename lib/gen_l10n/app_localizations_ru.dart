@@ -195,4 +195,10 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get save => 'Сохранить';
+
+  @override
+  String get taskColorTitle => 'Цвет задачи';
+
+  @override
+  String get confirm => 'Подтвердить';
 }
