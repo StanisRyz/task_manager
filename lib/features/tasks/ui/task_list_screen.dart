@@ -293,114 +293,146 @@ class TaskListScreen extends ConsumerWidget {
                         ),
                       );
                     },
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  task.title,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium
-                                      ?.copyWith(
-                                        decoration: task.status ==
-                                                TaskStatus.done
-                                            ? TextDecoration.lineThrough
-                                            : null,
-                                      ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  shortDescriptionText,
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  task.status.label(l10n),
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .labelLarge
-                                      ?.copyWith(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .primary,
-                                      ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(dueLabel),
-                                if (task.tags.isNotEmpty) ...[
-                                  const SizedBox(height: 8),
-                                  Wrap(
-                                    spacing: 6,
-                                    runSpacing: -6,
-                                    children: task.tags
-                                        .map(
-                                          (tag) => Chip(
-                                            label: Text('#$tag'),
-                                            visualDensity:
-                                                VisualDensity.compact,
+                    child: Stack(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      task.title,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium
+                                          ?.copyWith(
+                                            decoration: task.status ==
+                                                    TaskStatus.done
+                                                ? TextDecoration.lineThrough
+                                                : null,
                                           ),
-                                        )
-                                        .toList(),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      shortDescriptionText,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium,
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      task.status.label(l10n),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelLarge
+                                          ?.copyWith(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .primary,
+                                          ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(dueLabel),
+                                    if (task.tags.isNotEmpty) ...[
+                                      const SizedBox(height: 8),
+                                      Wrap(
+                                        spacing: 6,
+                                        runSpacing: -6,
+                                        children: task.tags
+                                            .map(
+                                              (tag) => Chip(
+                                                label: Text('#$tag'),
+                                                visualDensity:
+                                                    VisualDensity.compact,
+                                              ),
+                                            )
+                                            .toList(),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.check),
+                                    onPressed: () async {
+                                      final shouldComplete =
+                                          await showDialog<bool>(
+                                        context: context,
+                                        builder: (dialogContext) =>
+                                            AlertDialog(
+                                          title:
+                                              Text(l10n.markCompletedTitle),
+                                          content:
+                                              Text(l10n.markCompletedMessage),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.of(
+                                                  dialogContext,
+                                                ).pop(false);
+                                              },
+                                              child: Text(l10n.no),
+                                            ),
+                                            FilledButton(
+                                              onPressed: () {
+                                                Navigator.of(
+                                                  dialogContext,
+                                                ).pop(true);
+                                              },
+                                              child: Text(l10n.yes),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                      if (shouldComplete == true) {
+                                        await ref
+                                            .read(
+                                              tasksControllerProvider.notifier,
+                                            )
+                                            .toggleDone(task.id);
+                                      }
+                                    },
+                                  ),
+                                  IconButton(
+                                    tooltip: l10n.deleteTaskTooltip,
+                                    icon: const Icon(Icons.delete_outline),
+                                    onPressed: () => confirmDelete(task),
                                   ),
                                 ],
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.check),
-                                onPressed: () async {
-                                  final shouldComplete =
-                                      await showDialog<bool>(
-                                    context: context,
-                                    builder: (dialogContext) => AlertDialog(
-                                      title: Text(l10n.markCompletedTitle),
-                                      content: Text(l10n.markCompletedMessage),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () {
-                                            Navigator.of(dialogContext)
-                                                .pop(false);
-                                          },
-                                          child: Text(l10n.no),
-                                        ),
-                                        FilledButton(
-                                          onPressed: () {
-                                            Navigator.of(dialogContext)
-                                                .pop(true);
-                                          },
-                                          child: Text(l10n.yes),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                  if (shouldComplete == true) {
-                                    await ref
-                                        .read(
-                                          tasksControllerProvider.notifier,
-                                        )
-                                        .toggleDone(task.id);
-                                  }
-                                },
-                              ),
-                              IconButton(
-                                tooltip: l10n.deleteTaskTooltip,
-                                icon: const Icon(Icons.delete_outline),
-                                onPressed: () => confirmDelete(task),
                               ),
                             ],
                           ),
-                        ],
-                      ),
+                        ),
+                        Positioned.fill(
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: FractionallySizedBox(
+                              widthFactor: 0.05,
+                              heightFactor: 1,
+                              alignment: Alignment.centerLeft,
+                              child: IgnorePointer(
+                                child: DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    color: Color(task.colorValue),
+                                    borderRadius: const BorderRadius.only(
+                                      topLeft: Radius.circular(16),
+                                      bottomLeft: Radius.circular(16),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 );

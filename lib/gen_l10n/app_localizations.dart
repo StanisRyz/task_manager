@@ -445,6 +445,18 @@ abstract class AppLocalizations {
   /// In ru, this message translates to:
   /// **'Сохранить'**
   String get save;
+
+  /// No description provided for @taskColorTitle.
+  ///
+  /// In ru, this message translates to:
+  /// **'Цвет задачи'**
+  String get taskColorTitle;
+
+  /// No description provided for @confirm.
+  ///
+  /// In ru, this message translates to:
+  /// **'Подтвердить'**
+  String get confirm;
 }
 
 class _AppLocalizationsDelegate
