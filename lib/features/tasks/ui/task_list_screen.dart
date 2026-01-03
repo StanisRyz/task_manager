@@ -359,56 +359,61 @@ class TaskListScreen extends ConsumerWidget {
                                 ),
                               ),
                               const SizedBox(width: 12),
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.check),
-                                    onPressed: () async {
-                                      final shouldComplete =
-                                          await showDialog<bool>(
-                                        context: context,
-                                        builder: (dialogContext) =>
-                                            AlertDialog(
-                                          title:
-                                              Text(l10n.markCompletedTitle),
-                                          content:
-                                              Text(l10n.markCompletedMessage),
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () {
-                                                Navigator.of(
-                                                  dialogContext,
-                                                ).pop(false);
-                                              },
-                                              child: Text(l10n.no),
+                              Transform.translate(
+                                offset: const Offset(0, -4),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.check),
+                                      onPressed: () async {
+                                        final shouldComplete =
+                                            await showDialog<bool>(
+                                          context: context,
+                                          builder: (dialogContext) =>
+                                              AlertDialog(
+                                            title:
+                                                Text(l10n.markCompletedTitle),
+                                            content: Text(
+                                              l10n.markCompletedMessage,
                                             ),
-                                            FilledButton(
-                                              onPressed: () {
-                                                Navigator.of(
-                                                  dialogContext,
-                                                ).pop(true);
-                                              },
-                                              child: Text(l10n.yes),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                      if (shouldComplete == true) {
-                                        await ref
-                                            .read(
-                                              tasksControllerProvider.notifier,
-                                            )
-                                            .toggleDone(task.id);
-                                      }
-                                    },
-                                  ),
-                                  IconButton(
-                                    tooltip: l10n.deleteTaskTooltip,
-                                    icon: const Icon(Icons.delete_outline),
-                                    onPressed: () => confirmDelete(task),
-                                  ),
-                                ],
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.of(
+                                                    dialogContext,
+                                                  ).pop(false);
+                                                },
+                                                child: Text(l10n.no),
+                                              ),
+                                              FilledButton(
+                                                onPressed: () {
+                                                  Navigator.of(
+                                                    dialogContext,
+                                                  ).pop(true);
+                                                },
+                                                child: Text(l10n.yes),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                        if (shouldComplete == true) {
+                                          await ref
+                                              .read(
+                                                tasksControllerProvider
+                                                    .notifier,
+                                              )
+                                              .toggleDone(task.id);
+                                        }
+                                      },
+                                    ),
+                                    IconButton(
+                                      tooltip: l10n.deleteTaskTooltip,
+                                      icon: const Icon(Icons.delete_outline),
+                                      onPressed: () => confirmDelete(task),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ],
                           ),

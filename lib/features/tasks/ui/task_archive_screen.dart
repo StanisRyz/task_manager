@@ -142,10 +142,13 @@ class TaskArchiveScreen extends ConsumerWidget {
                               ),
                             ),
                             const SizedBox(width: 12),
-                            IconButton(
-                              tooltip: l10n.deleteTaskTooltip,
-                              icon: const Icon(Icons.delete_outline),
-                              onPressed: () => confirmDelete(task),
+                            Transform.translate(
+                              offset: const Offset(0, -4),
+                              child: IconButton(
+                                tooltip: l10n.deleteTaskTooltip,
+                                icon: const Icon(Icons.delete_outline),
+                                onPressed: () => confirmDelete(task),
+                              ),
                             ),
                           ],
                         ),
