@@ -61,18 +61,18 @@ dev_dependencies:
   flutter_lints: ^6.0.0
 
 flutter_launcher_icons:
-  android: true
+  android: "launcher_icon"
   ios: false
-  image_path: assets/branding/icon.png
+  image_path: "assets/branding/icon.png"
 
 flutter_native_splash:
   color: "#FFFFFF"
-  image: assets/branding/backgro.png
+  image: "assets/branding/backgro.png"
   android: true
   ios: false
   android_12:
     color: "#FFFFFF"
-    image: assets/branding/backgro.png
+    image: "assets/branding/backgro.png"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
