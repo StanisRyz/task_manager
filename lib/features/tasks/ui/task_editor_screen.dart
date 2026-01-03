@@ -12,6 +12,7 @@ import '../../../l10n/app_localizations_ext.dart';
 import '../data/attachment_storage.dart';
 import '../data/task.dart';
 import '../state/tasks_controller.dart';
+import 'attachment_preview.dart';
 import 'task_status_label.dart';
 
 class TaskEditorScreen extends ConsumerStatefulWidget {
@@ -570,6 +571,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                         .map(
                           (attachment) => ListTile(
                             contentPadding: EdgeInsets.zero,
+                            leading: AttachmentPreview(path: attachment),
                             title: Text(_attachmentLabel(attachment)),
                             subtitle: Text(
                               attachment,
