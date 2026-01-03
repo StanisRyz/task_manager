@@ -13,6 +13,7 @@ import '../data/attachment_storage.dart';
 import '../data/task.dart';
 import '../state/tasks_controller.dart';
 import 'attachment_preview.dart';
+import 'task_color_picker_screen.dart';
 import 'task_status_label.dart';
 
 class TaskEditorScreen extends ConsumerStatefulWidget {
@@ -44,6 +45,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
   late TaskStatus _status;
   DateTime? _dueAt;
   late List<String> _attachments;
+  late int _colorValue;
 
   @override
   void initState() {
@@ -56,6 +58,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
     _status = task?.status ?? TaskStatus.planned;
     _dueAt = task?.dueAt;
     _attachments = List<String>.from(task?.attachments ?? []);
+    _colorValue = task?.colorValue ?? defaultTaskColorValue;
   }
 
   @override
@@ -140,6 +143,22 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
       return;
     }
     _addAttachmentValue(storedPath);
+  }
+
+  Future<void> _pickColor() async {
+    final selectedColor = await Navigator.of(context).push<int>(
+      MaterialPageRoute(
+        builder: (_) => TaskColorPickerScreen(
+          initialColorValue: _colorValue,
+        ),
+      ),
+    );
+    if (selectedColor == null) {
+      return;
+    }
+    setState(() {
+      _colorValue = selectedColor;
+    });
   }
 
   String _attachmentLabel(String path) {
@@ -255,6 +274,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
       status: status,
       tags: _parseTags(_tagsController.text),
       attachments: List<String>.from(_attachments),
+      colorValue: _colorValue,
       createdAt: existing?.createdAt ?? now,
       updatedAt: now,
       completedAt: completedAt,
@@ -476,10 +496,35 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                 const SizedBox(height: 8),
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: FilledButton.icon(
-                    onPressed: _pickAttachment,
-                    icon: const Icon(Icons.attach_file),
-                    label: Text(l10n.addAttachmentFile),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      FilledButton.icon(
+                        onPressed: _pickAttachment,
+                        icon: const Icon(Icons.attach_file),
+                        label: Text(l10n.addAttachmentFile),
+                      ),
+                      const SizedBox(width: 12),
+                      Tooltip(
+                        message: l10n.taskColorTitle,
+                        child: InkWell(
+                          onTap: _pickColor,
+                          borderRadius: BorderRadius.circular(6),
+                          child: Container(
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                color: Colors.white,
+                                width: 3,
+                              ),
+                              color: Color(_colorValue),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 12),
