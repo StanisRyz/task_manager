@@ -64,12 +64,13 @@ class _TaskColorPickerScreenState extends State<TaskColorPickerScreen> {
                 ),
                 itemBuilder: (context, index) {
                   final color = _palette[index];
-                  final isSelected = color.value == _selectedColorValue;
+                  final colorValue = color.toARGB32();
+                  final isSelected = colorValue == _selectedColorValue;
                   return InkWell(
                     borderRadius: BorderRadius.circular(999),
                     onTap: () {
                       setState(() {
-                        _selectedColorValue = color.value;
+                        _selectedColorValue = colorValue;
                       });
                     },
                     child: Container(
