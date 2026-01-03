@@ -186,18 +186,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get attachmentsTitle => 'Вложения';
 
   @override
-  String get attachmentTypeLabel => 'Тип вложения';
-
-  @override
-  String get attachmentTypePhoto => 'Фото';
-
-  @override
-  String get attachmentTypeVideo => 'Видео';
-
-  @override
-  String get attachmentTypeDocument => 'Документ';
-
-  @override
   String get addAttachmentFile => 'Добавить файл';
 
   @override

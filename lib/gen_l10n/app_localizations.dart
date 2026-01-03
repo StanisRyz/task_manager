@@ -422,30 +422,6 @@ abstract class AppLocalizations {
   /// **'Вложения'**
   String get attachmentsTitle;
 
-  /// No description provided for @attachmentTypeLabel.
-  ///
-  /// In ru, this message translates to:
-  /// **'Тип вложения'**
-  String get attachmentTypeLabel;
-
-  /// No description provided for @attachmentTypePhoto.
-  ///
-  /// In ru, this message translates to:
-  /// **'Фото'**
-  String get attachmentTypePhoto;
-
-  /// No description provided for @attachmentTypeVideo.
-  ///
-  /// In ru, this message translates to:
-  /// **'Видео'**
-  String get attachmentTypeVideo;
-
-  /// No description provided for @attachmentTypeDocument.
-  ///
-  /// In ru, this message translates to:
-  /// **'Документ'**
-  String get attachmentTypeDocument;
-
   /// No description provided for @addAttachmentFile.
   ///
   /// In ru, this message translates to:
