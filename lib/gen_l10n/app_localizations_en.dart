@@ -193,4 +193,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get save => 'Save';
+
+  @override
+  String get taskColorTitle => 'Task color';
+
+  @override
+  String get confirm => 'Confirm';
 }
