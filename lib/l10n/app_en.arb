@@ -76,5 +76,7 @@
   "attachmentTypeDocument": "Document",
   "addAttachmentFile": "Add file",
   "noAttachments": "No attachments",
+  "attachmentMissing": "Attachment file is missing",
+  "attachmentOpenFailed": "Could not open the attachment",
   "save": "Save"
 }

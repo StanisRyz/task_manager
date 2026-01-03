@@ -76,5 +76,7 @@
   "attachmentTypeDocument": "Документ",
   "addAttachmentFile": "Добавить файл",
   "noAttachments": "Вложений нет",
+  "attachmentMissing": "Файл вложения не найден",
+  "attachmentOpenFailed": "Не удалось открыть вложение",
   "save": "Сохранить"
 }
