@@ -144,7 +144,7 @@ class _PreviewFrame extends StatelessWidget {
       child: Container(
         width: size,
         height: size,
-        color: Theme.of(context).colorScheme.surfaceVariant,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         alignment: Alignment.center,
         child: child,
       ),

@@ -133,8 +133,8 @@ Future<String?> createPdfThumbnail(String path, {int maxSize = 256}) async {
     page = await document.getPage(1);
     final longestSide = math.max(page.width, page.height);
     final scale = longestSide == 0 ? 1.0 : maxSize / longestSide;
-    final targetWidth = (page.width * scale).round();
-    final targetHeight = (page.height * scale).round();
+    final targetWidth = (page.width * scale).toDouble();
+    final targetHeight = (page.height * scale).toDouble();
     final pageImage = await page.render(
       width: targetWidth,
       height: targetHeight,
