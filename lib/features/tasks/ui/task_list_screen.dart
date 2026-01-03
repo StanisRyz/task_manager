@@ -296,7 +296,7 @@ class TaskListScreen extends ConsumerWidget {
                     child: Stack(
                       children: [
                         Padding(
-                          padding: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.fromLTRB(24, 16, 16, 16),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -415,7 +415,7 @@ class TaskListScreen extends ConsumerWidget {
                           child: Align(
                             alignment: Alignment.centerLeft,
                             child: FractionallySizedBox(
-                              widthFactor: 0.05,
+                              widthFactor: 0.02,
                               heightFactor: 1,
                               alignment: Alignment.centerLeft,
                               child: IgnorePointer(
