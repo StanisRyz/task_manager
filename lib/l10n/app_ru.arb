@@ -23,6 +23,7 @@
     }
   },
   "tasksTitle": "Задачи",
+  "searchPlaceholder": "Поиск…",
   "filterTooltip": "Фильтры",
   "sortTooltip": "Сортировка",
   "archiveTooltip": "Архив",
