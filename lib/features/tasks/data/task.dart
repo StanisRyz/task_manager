@@ -6,6 +6,8 @@ enum TaskStatus {
   done,
 }
 
+const int defaultTaskColorValue = 0xFF2196F3;
+
 class Task {
   Task({
     required this.id,
@@ -16,6 +18,7 @@ class Task {
     required this.status,
     required this.tags,
     required this.attachments,
+    required this.colorValue,
     required this.createdAt,
     required this.updatedAt,
     required this.completedAt,
@@ -29,6 +32,7 @@ class Task {
   final TaskStatus status;
   final List<String> tags;
   final List<String> attachments;
+  final int colorValue;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? completedAt;
@@ -42,6 +46,7 @@ class Task {
     TaskStatus? status,
     List<String>? tags,
     List<String>? attachments,
+    int? colorValue,
     DateTime? createdAt,
     DateTime? updatedAt,
     DateTime? completedAt,
@@ -55,6 +60,7 @@ class Task {
       status: status ?? this.status,
       tags: tags ?? List<String>.from(this.tags),
       attachments: attachments ?? List<String>.from(this.attachments),
+      colorValue: colorValue ?? this.colorValue,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       completedAt: completedAt ?? this.completedAt,
@@ -98,6 +104,7 @@ class TaskAdapter extends TypeAdapter<Task> {
       status: fields[4] as TaskStatus,
       tags: (fields[5] as List).cast<String>(),
       attachments: (fields[6] as List).cast<String>(),
+      colorValue: fields[11] as int? ?? defaultTaskColorValue,
       createdAt: fields[7] as DateTime,
       updatedAt: fields[8] as DateTime,
       completedAt: fields[9] as DateTime?,
@@ -107,7 +114,7 @@ class TaskAdapter extends TypeAdapter<Task> {
   @override
   void write(BinaryWriter writer, Task obj) {
     writer
-      ..writeByte(11)
+      ..writeByte(12)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -129,6 +136,8 @@ class TaskAdapter extends TypeAdapter<Task> {
       ..writeByte(9)
       ..write(obj.completedAt)
       ..writeByte(10)
-      ..write(obj.shortDescription);
+      ..write(obj.shortDescription)
+      ..writeByte(11)
+      ..write(obj.colorValue);
   }
 }

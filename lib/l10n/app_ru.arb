@@ -73,5 +73,7 @@
   "noAttachments": "Вложений нет",
   "attachmentMissing": "Файл вложения не найден",
   "attachmentOpenFailed": "Не удалось открыть вложение",
-  "save": "Сохранить"
+  "save": "Сохранить",
+  "taskColorTitle": "Цвет задачи",
+  "confirm": "Подтвердить"
 }
