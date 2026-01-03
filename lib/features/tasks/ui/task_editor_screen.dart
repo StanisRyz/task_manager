@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,6 +12,7 @@ import '../../../l10n/app_localizations_ext.dart';
 import '../data/attachment_storage.dart';
 import '../data/task.dart';
 import '../state/tasks_controller.dart';
+import 'attachment_preview.dart';
 import 'task_status_label.dart';
 
 class TaskEditorScreen extends ConsumerStatefulWidget {
@@ -162,6 +165,32 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
       return;
     }
     _addAttachmentValue(storedPath);
+  }
+
+  String _attachmentLabel(String path) {
+    final fileName = path.split(Platform.pathSeparator).last;
+    final cleaned =
+        fileName.replaceFirst(RegExp(r'^[0-9a-fA-F-]{36}_'), '');
+    return cleaned.isEmpty ? fileName : cleaned;
+  }
+
+  Future<void> _openAttachment(String path) async {
+    final result = await openAttachmentFile(path);
+    if (!mounted) {
+      return;
+    }
+    final l10n = context.l10n;
+    final message = switch (result) {
+      AttachmentOpenResult.opened => null,
+      AttachmentOpenResult.missing => l10n.attachmentMissing,
+      AttachmentOpenResult.failed => l10n.attachmentOpenFailed,
+    };
+    if (message == null) {
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 
   List<String> _parseTags(String raw) {
@@ -542,7 +571,14 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                         .map(
                           (attachment) => ListTile(
                             contentPadding: EdgeInsets.zero,
-                            title: Text(attachment),
+                            leading: AttachmentPreview(path: attachment),
+                            title: Text(_attachmentLabel(attachment)),
+                            subtitle: Text(
+                              attachment,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            onTap: () => _openAttachment(attachment),
                             trailing: IconButton(
                               icon: const Icon(Icons.delete_outline),
                               onPressed: () {
