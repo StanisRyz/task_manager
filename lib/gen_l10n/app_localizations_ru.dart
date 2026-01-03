@@ -143,13 +143,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get descriptionLabel => 'Описание';
 
   @override
-  String get descriptionRequired => 'Введите описание задачи';
-
-  @override
-  String get descriptionOrShortRequired =>
-      'Введите краткое описание или описание';
-
-  @override
   String get statusLabel => 'Статус';
 
   @override

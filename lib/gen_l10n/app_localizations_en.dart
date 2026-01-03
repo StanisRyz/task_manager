@@ -141,13 +141,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get descriptionLabel => 'Description';
 
   @override
-  String get descriptionRequired => 'Enter a task description';
-
-  @override
-  String get descriptionOrShortRequired =>
-      'Enter a short description or description';
-
-  @override
   String get statusLabel => 'Status';
 
   @override

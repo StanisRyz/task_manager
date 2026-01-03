@@ -314,17 +314,9 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                   ),
                   inputFormatters: [
                     _singleLineFormatter,
-                    LengthLimitingTextInputFormatter(100),
+                    LengthLimitingTextInputFormatter(30),
                   ],
-                  maxLength: 100,
-                  validator: (value) {
-                    final description = _descriptionController.text.trim();
-                    if ((value == null || value.trim().isEmpty) &&
-                        description.isEmpty) {
-                      return l10n.descriptionOrShortRequired;
-                    }
-                    return null;
-                  },
+                  maxLength: 30,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -338,15 +330,6 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                   inputFormatters: [
                     _multiLineFormatter,
                   ],
-                  validator: (value) {
-                    final shortDescription =
-                        _shortDescriptionController.text.trim();
-                    if ((value == null || value.trim().isEmpty) &&
-                        shortDescription.isEmpty) {
-                      return l10n.descriptionOrShortRequired;
-                    }
-                    return null;
-                  },
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<TaskStatus>(

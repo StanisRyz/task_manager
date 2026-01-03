@@ -338,18 +338,6 @@ abstract class AppLocalizations {
   /// **'Описание'**
   String get descriptionLabel;
 
-  /// No description provided for @descriptionRequired.
-  ///
-  /// In ru, this message translates to:
-  /// **'Введите описание задачи'**
-  String get descriptionRequired;
-
-  /// No description provided for @descriptionOrShortRequired.
-  ///
-  /// In ru, this message translates to:
-  /// **'Введите краткое описание или описание'**
-  String get descriptionOrShortRequired;
-
   /// No description provided for @statusLabel.
   ///
   /// In ru, this message translates to:
