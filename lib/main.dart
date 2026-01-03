@@ -8,7 +8,6 @@ import 'features/settings/state/locale_provider.dart';
 import 'features/tasks/data/task.dart';
 import 'features/tasks/data/tasks_repository.dart';
 import 'features/tasks/state/tasks_controller.dart';
-import 'startup/startup_reset.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,7 +16,6 @@ Future<void> main() async {
   Hive.registerAdapter(TaskAdapter());
   final box = await Hive.openBox<Task>('tasks');
   final settingsBox = await Hive.openBox<String>('settings');
-  await resetTasksOnStartup(box);
 
   runApp(
     ProviderScope(
