@@ -56,8 +56,6 @@
   "titleRequired": "Enter a task title",
   "shortDescriptionLabel": "Short description",
   "descriptionLabel": "Description",
-  "descriptionRequired": "Enter a task description",
-  "descriptionOrShortRequired": "Enter a short description or description",
   "statusLabel": "Status",
   "statusPlanned": "Planned",
   "statusInProgress": "In progress",

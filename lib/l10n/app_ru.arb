@@ -56,8 +56,6 @@
   "titleRequired": "Введите название задачи",
   "shortDescriptionLabel": "Краткое описание",
   "descriptionLabel": "Описание",
-  "descriptionRequired": "Введите описание задачи",
-  "descriptionOrShortRequired": "Введите краткое описание или описание",
   "statusLabel": "Статус",
   "statusPlanned": "Запланировано",
   "statusInProgress": "В работе",

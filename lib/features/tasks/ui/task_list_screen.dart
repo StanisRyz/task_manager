@@ -233,6 +233,11 @@ class TaskListScreen extends ConsumerWidget {
               separatorBuilder: (_, _) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
                 final task = sortedTasks[index];
+                final shortDescription = task.shortDescription?.trim();
+                final shortDescriptionText =
+                    (shortDescription == null || shortDescription.isEmpty)
+                        ? '—'
+                        : shortDescription;
                 final dueLabel = task.dueAt == null
                     ? l10n.dueDateNotSet
                     : _formatDueLabel(
@@ -274,6 +279,11 @@ class TaskListScreen extends ConsumerWidget {
                                             ? TextDecoration.lineThrough
                                             : null,
                                       ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  shortDescriptionText,
+                                  style: Theme.of(context).textTheme.bodyMedium,
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
