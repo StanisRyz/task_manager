@@ -281,11 +281,13 @@ class TaskListScreen extends ConsumerWidget {
                         numberFormat,
                       );
 
+                final cardRadius = BorderRadius.circular(16);
                 return Material(
                   color: cardColor,
-                  borderRadius: BorderRadius.circular(16),
+                  shape: RoundedRectangleBorder(borderRadius: cardRadius),
+                  clipBehavior: Clip.antiAlias,
                   child: InkWell(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: cardRadius,
                     onTap: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
