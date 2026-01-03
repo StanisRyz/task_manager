@@ -290,6 +290,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final tasks = ref.watch(tasksControllerProvider);
+    final colorScheme = Theme.of(context).colorScheme;
     final tagCounts = _collectTagCounts(tasks);
     final knownTags = tagCounts.keys.toList()..sort();
     final localeTag = Localizations.localeOf(context).toLanguageTag();
@@ -516,7 +517,9 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(6),
                               border: Border.all(
-                                color: Colors.white,
+                                color: colorScheme.brightness == Brightness.dark
+                                    ? Colors.white
+                                    : Colors.black,
                                 width: 3,
                               ),
                               color: Color(_colorValue),

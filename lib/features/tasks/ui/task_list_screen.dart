@@ -413,18 +413,18 @@ class TaskListScreen extends ConsumerWidget {
                         ),
                         Positioned.fill(
                           child: Align(
-                            alignment: Alignment.centerRight,
+                            alignment: Alignment.centerLeft,
                             child: FractionallySizedBox(
-                              widthFactor: 0.07,
+                              widthFactor: 0.05,
                               heightFactor: 1,
-                              alignment: Alignment.centerRight,
+                              alignment: Alignment.centerLeft,
                               child: IgnorePointer(
                                 child: DecoratedBox(
                                   decoration: BoxDecoration(
                                     color: Color(task.colorValue),
                                     borderRadius: const BorderRadius.only(
-                                      topRight: Radius.circular(16),
-                                      bottomRight: Radius.circular(16),
+                                      topLeft: Radius.circular(16),
+                                      bottomLeft: Radius.circular(16),
                                     ),
                                   ),
                                 ),
