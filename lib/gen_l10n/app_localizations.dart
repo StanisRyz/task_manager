@@ -206,6 +206,12 @@ abstract class AppLocalizations {
   /// **'Задачи'**
   String get tasksTitle;
 
+  /// No description provided for @searchPlaceholder.
+  ///
+  /// In ru, this message translates to:
+  /// **'Поиск…'**
+  String get searchPlaceholder;
+
   /// No description provided for @filterTooltip.
   ///
   /// In ru, this message translates to:

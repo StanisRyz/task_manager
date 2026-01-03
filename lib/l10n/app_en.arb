@@ -23,6 +23,7 @@
     }
   },
   "tasksTitle": "Tasks",
+  "searchPlaceholder": "Search…",
   "filterTooltip": "Filters",
   "sortTooltip": "Sort",
   "archiveTooltip": "Archive",

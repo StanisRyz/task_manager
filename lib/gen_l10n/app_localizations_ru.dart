@@ -65,6 +65,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get tasksTitle => 'Задачи';
 
   @override
+  String get searchPlaceholder => 'Поиск…';
+
+  @override
   String get filterTooltip => 'Фильтры';
 
   @override

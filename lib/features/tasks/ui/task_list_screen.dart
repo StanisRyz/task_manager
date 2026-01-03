@@ -32,6 +32,7 @@ final taskSortProvider =
     StateProvider<TaskDeadlineSort>((ref) => TaskDeadlineSort.ascending);
 
 final taskTagFilterProvider = StateProvider<String?>((ref) => null);
+final taskSearchQueryProvider = StateProvider<String>((ref) => '');
 
 class TaskListScreen extends ConsumerWidget {
   const TaskListScreen({super.key});
@@ -118,6 +119,8 @@ class TaskListScreen extends ConsumerWidget {
     final numberFormat = NumberFormat.decimalPattern(localeTag);
     final selectedSort = ref.watch(taskSortProvider);
     final selectedTag = ref.watch(taskTagFilterProvider);
+    final searchQuery = ref.watch(taskSearchQueryProvider);
+    final normalizedQuery = searchQuery.trim().toLowerCase();
 
     Future<void> confirmDelete(Task task) async {
       final shouldDelete = await showDialog<bool>(
@@ -158,7 +161,19 @@ class TaskListScreen extends ConsumerWidget {
         : visibleTasks
             .where((task) => task.tags.contains(selectedTag))
             .toList();
-    final sortedTasks = _sortTasks(filteredTasks, selectedSort);
+    final searchedTasks = normalizedQuery.isEmpty
+        ? filteredTasks
+        : filteredTasks
+            .where((task) {
+              final titleMatch =
+                  task.title.toLowerCase().contains(normalizedQuery);
+              final descriptionMatch = (task.shortDescription ?? '')
+                  .toLowerCase()
+                  .contains(normalizedQuery);
+              return titleMatch || descriptionMatch;
+            })
+            .toList();
+    final sortedTasks = _sortTasks(searchedTasks, selectedSort);
 
     Future<void> openFilterScreen() async {
       final result = await Navigator.of(context).push<String?>(
@@ -175,7 +190,26 @@ class TaskListScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.tasksTitle),
+        title: SizedBox(
+          height: 40,
+          child: TextField(
+            onChanged: (value) {
+              ref.read(taskSearchQueryProvider.notifier).state = value;
+            },
+            textInputAction: TextInputAction.search,
+            decoration: InputDecoration(
+              hintText: l10n.searchPlaceholder,
+              prefixIcon: const Icon(Icons.search),
+              filled: true,
+              fillColor: scheme.surfaceContainerHighest,
+              contentPadding: const EdgeInsets.symmetric(vertical: 0),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(20),
+                borderSide: BorderSide.none,
+              ),
+            ),
+          ),
+        ),
         actions: [
           IconButton(
             key: const Key('open-filter-button'),

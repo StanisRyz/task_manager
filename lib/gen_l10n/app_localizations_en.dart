@@ -65,6 +65,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tasksTitle => 'Tasks';
 
   @override
+  String get searchPlaceholder => 'Search…';
+
+  @override
   String get filterTooltip => 'Filters';
 
   @override
